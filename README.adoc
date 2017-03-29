@@ -1,0 +1,33 @@
+= Pivotal Cloud Native Applications Workshop
+== Overview
+[.lead]
+This one day hands-on classroom style session will provide developers with hands on experience building cloud native applications using micro service architectures, Spring Boot, and Spring Cloud. The session includes presentations, demos and hands on labs.
+
+== Schedule
+
+08:00 AM - 09:00 AM::
+ * Arrive, get settled
+09:00 AM - 09:45 AM::
+ * Welcome and Agenda
+ * Overview: Cloud Native Design, Domain Driven Design, & Microservices
+09:45 AM - 10:30 AM::
+ * Session 1: Introducing Spring and Spring Boot
+ * Lab 1: link:labs/lab01/lab01.adoc[Building A Spring Boot Application]
+10:30 AM - 11:15 AM::
+ * Session 2: Advancing Spring Boot with Actuator and Profiles
+ * Lab 2: link:labs/lab02/lab02.adoc[_Actuator and Profiles_]
+11:15 AM - 12:00 AM::
+ * Session 3: Polyglot Persistence with Spring Data REST
+ * Lab 3: link:labs/lab03/lab03.adoc[_Adding Persistence to Boot Application_]
+12:00 PM - 12:30 PM:: Lunch
+12:30 PM - 01:30 PM::
+  * Session 4: Introduction to Spring Cloud
+  * Lab 4: link:labs/lab04/lab04.adoc[_Adding Remote Configuration_]
+01:30 PM - 02:15 PM::
+  * Session 5: Service Discovery & Load Balancing
+  * Lab 5: link:labs/lab05/lab05.adoc[_Service Discovery and Load Balancing_]
+02:15 PM - 02:30 PM:: Break
+02:30 PM - 03:15 PM::
+  * Session 6: Fault Tolerance with Circuit Breakers
+  * Lab 6: link:labs/lab06/lab06.adoc[_Adding Circuit Breakers_]
+3:15 PM - 3:30 PM:: Wrap-Up and Closing
