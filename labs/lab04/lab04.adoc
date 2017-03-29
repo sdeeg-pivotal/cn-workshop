@@ -1,0 +1,228 @@
+= Spring Cloud Config
+
+This lab will walk through the process of using a Spring Cloud Config server.  The repository will be located in a repo on github.  If you have git available locally, you can use your own local version.  The first thing we need is an appliation that has a property that we will eventually retrieve remotely.
+
++
+Load the greeting-service project into STS/Eclipse
++
+[source, bash]
+---------------------------------------------------------------------
+CN-Workshop-Boeing-workspace:
+├── labs
+│   ├── lab04
+│   │   ├── greeting-service
+---------------------------------------------------------------------
+
+We'll start by creating a simple Greeting domain object that will display contain the value of a property, a Configuration class to create an instance of the Greeting, and a controller to return the value.
+
+. Add the property app.greeting in _application.yml_ (/greeting-service/src/main/resources/application.yml).
++
+[yaml]
+---------------------------------------------------------------------
+app:
+  greeting: hello, world
+---------------------------------------------------------------------
+
+. Create the class _io.pivotal.Greeting_ (/greeting-service/src/main/java/io/pivotal/Greeting.java).
++
+[source, java, numbered]
+---------------------------------------------------------------------
+package io.pivotal;
+
+import org.springframework.beans.factory.annotation.Value;
+
+public class Greeting {
+
+  @Value("${app.greeting:Doh!}")
+  public String greeting;
+}
+---------------------------------------------------------------------
+
+. Create the @Configuration class _io.pivotal.GreetingConfig_ (/greeting-service/src/main/java/io/pivotal/GreetingConfig.java).
++
+[source, java, numbered]
+---------------------------------------------------------------------
+package io.pivotal;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class GreetingConfig {
+
+  @Bean
+  Greeting greeting() {
+    return new Greeting();
+  }
+}
+---------------------------------------------------------------------
+
+. Create an @RestController class _io.pivotal.GreetingController_ (/greeting-service/src/main/java/io/pivotal/GreetingController.java).
++
+[source, java, numbered]
+---------------------------------------------------------------------
+package io.pivotal;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class GreetingController {
+
+  @Autowired
+  private Greeting greeting;
+
+  @RequestMapping("/greeting")
+  public Greeting greeting() {
+    return greeting;
+  }
+}
+---------------------------------------------------------------------
+
+
+== Run the _greeting-service_ Application
+
+. In a terminal, change working directory to *CN-Workshop-Boeing-workspace/labs/lab04/greeting-service*
+
+. Run the application
++
+$ mvn clean spring-boot:run
+
+. You should see the application start up an embedded Apache Tomcat server on port 8080 (review terminal output):
+
+Browse to http://localhost:8080/greeting
+
+Now look at the properties in the environment
+
+http://localhost:8080/env
+
+Notice that the property is listed along with the file that it came from.
++
+[json]
+---------------------------------------------------------------------
+  "applicationConfig: [classpath:/application.yml]": {
+    "app.greeting": "hello, world"
+  }
+---------------------------------------------------------------------
+
+=== Set up config-server
+
+Load the config-service project into STS/Eclipse if you like
++
+[source, bash]
+---------------------------------------------------------------------
+CN-Workshop-Boeing-workspace:
+├── labs
+│   ├── lab04
+│   │   ├── config-server
+---------------------------------------------------------------------
+
+. Review the following file: `CN-Workshop-Boeing-workspace/labs/lab04/config-server/pom.xml` By adding `spring-cloud-config-server` to the classpath, this application is eligible to embed a `config-server`.
++
+[source, xml]
+----
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-config-server</artifactId>
+</dependency>
+----
+
+. Make the application a config server by enabling it with the @EnableConfigServer:
+`CN-Workshop-Boeing-workspace/labs/lab04/config-server/src/main/java/io/pivotal/ConfigServerApplication.java`
++
+[source, java]
+---------------------------------------------------------------------
+@SpringBootApplication
+@EnableConfigServer
+public class ConfigServerApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigServerApplication.class, args);
+    }
+}
+---------------------------------------------------------------------
+
+. Set the GitHub repository for the `config-server`. This will be the source of the configuration data. Edit the `CN-Workshop-Boeing-workspace/labs/lab04/config-server/src/main/resources/application.yml` file
++
+[source, yaml]
+---------------------------------------------------------------------
+server:
+  port: 8888
+spring:
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/sdeeg-pivotal/app-config
+#          uri: ${HOME}/dev/app-config
+---------------------------------------------------------------------
+
+. Open a terminal window and start the `config-server`.
+```bash
+$ mvn clean spring-boot:run
+```
+Your `config-server` will be running locally once you see a *“Started ConfigServerApplication…”* message. You will not be returned to a command prompt and must leave this window open.
+
+. Open a browser window and fetch the following url: http://localhost:8888/greeting-service/default
+
+Config Server - API
+
+TIP: What Just Happened?
+
+The `config-server` exposes several endpoints to fetch configuration.
+
+In this case, we are manually calling one of those endpoints `/{application}/{profile}[/{label}]` to fetch configuration. We substituted our example client application `hello-world` as the {application} and the default profile as the {profile}. We didn’t specify the label to use so master is assumed. In the returned document, we see the configuration file `hello-world.yml` listed as a `propertySource` with the associated key/value pair. This is just an example, as you move through the lab you will add configuration for `greeting-config` (our client application).
+
+=== Set up `greeting-service` to consume the remote config
+
+. Add the config client by uncommenting it in  _pom.xml_ (/greeting-service/pom.xml).
++
+[source, xml]
+---------------------------------------------------------------------
+    <!-- Use this when consuming from the simple OSS Config Server -->
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-config</artifactId>
+    </dependency>
+---------------------------------------------------------------------
+
+. Add the following properties to greeting-service/src/main/resources/bootstrap.yml
++
+[source, yaml]
+---------------------------------------------------------------------
+spring:
+  application:
+    name: greeting-service
+  cloud:
+    config:
+      uri: ${vcap.services.config-service.credentials.uri:http://localhost:8888}
+---------------------------------------------------------------------
+
+. Start the `greeting-service` and observe the top of the log output where it show attaching to the config server.
++
+[source,bash]
+---------------------------------------------------------------------
+2016-06-16 01:24:53.034  INFO 16463 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Fetching config from server at: http://localhost:8888
+2016-06-16 01:24:53.792  INFO 16463 --- [           main] c.c.c.ConfigServicePropertySourceLocator : Located environment: name=greeting-service, profiles=[default], label=null, version=0fedb371c8f7f7b7c787348e1ad783c2e8dd3465
+---------------------------------------------------------------------
+
+. Test the service by hitting the URL: http://localhost:8080/greeting
+
+. Stop the `greeting-config` application
+
+
+=== Override Configuration Values By Profile
+
+. Stop the `greeting-service` application using Command-C or CTRL-C in the terminal window.
+
+. Set the active profile to boeing in greeting-service/src/resources/application.yml.
++
+[source, yaml]
+---------------------------------------------------------------------
+spring:
+  profiles:
+    active: boeing
+---------------------------------------------------------------------
+
+. Make sure the profile is set by browsing to the http://localhost:8080/env endpoint

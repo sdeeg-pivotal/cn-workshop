@@ -1,0 +1,404 @@
+= Spring Cloud Netflix: Service Discovery and Client Side Proxying
+
+== Spring Cloud Netflix: Service Discovery
+
+The Eureka service allows services to discover each other.  Of this exercise We'll start with the greeting-service from lab04, and will register it with a local instance of Eureka that we create.  From there we'll move on to creating a simple UI deliver service that is a Single Page Application (SPA) written in JavaScript that will consume the service by looking it up using the Zuul proxy.
+
+=== Set up `service-registry`
+
+. Review the `service-registry/pom.xml` file. By adding `spring-cloud-starter-eureka-server` to the classpath this application is eligible to embed an Eureka server.
+
+[source, xml]
+--------
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-eureka-server</artifactId>
+    </dependency>
+--------
+
+. Make the application a Service Registry by adding @EnableEurekaServer to the main app file.
+`service-registry/src/main/java/io/pivotal/ServiceRegistryApplication.java`
++
+[source,java]
+----
+ @SpringBootApplication
+ @EnableEurekaServer
+ public class ServiceRegistryApplication {
+
+     public static void main(String[] args) {
+         SpringApplication.run(ServiceRegistryApplication.class, args);
+     }
+ }
+----
+
+. Open up application.yml and add the following properties: `service-registry/src/main/resources/application.yml`
++
+[source, yaml]
+---------------------------------------------------------------------
+ server:
+   port: 8761
+
+ eureka:
+   instance:
+     hostname: localhost
+   client:
+     registerWithEureka: false
+     fetchRegistry: false
+     serviceUrl:
+       defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+---------------------------------------------------------------------
+NOTE: About Eureka
+
+Eureka is designed for peer awareness (running multiple instances with knowledge of each other) to further increase availability. Because of this, Eureka is not only a server but a client as well. Therefore, Eureka Servers will be clients to each other. Eureka Server A ⇄ Eureka Server B.
+
+For the purposes of this lab, we will simplify that configuration to run in standalone mode.
+
+Standlalone mode still offers a high degree of resilience with:
+
+* Heartbeats between the client and server to keep registrations up to date
+* Client side caching, so that clients don’t go to Eureka for every lookup
+* By running in Pivotal Cloud Foundry which is designed to keep applications up by design
+* With the above configuration, we have configured Eureka to run in standalone mode.
+
+Understanding the configuration parameters
+
+* `eureka.instance.hostname` - the hostname for this service. In this case, what host to use to reach our standalone Eureka instance.
+* `eureka.client.registerWithEureka` - should this application (our standalone Eureka instance) register with Eureka
+* `eureka.client.fetchRegistry` - should this application (our stand alone Eureka instance) fetch the registry (for how to discover services)
+* `eureka.client.serviceUrl.defaultZone` - the Eureka instance to use for registering and discovering services. Notice it is pointing to itself (`localhost, 8761`).
+
+. Open a new terminal window. Start the `service-registry`.
+```bash
+$ cd service-registry
+$ mvn clean spring-boot:run
+```
+. Verify the `service-registry` is up. Browse to http://localhost:8761 to see the Eureka dashboard.
+
+=== Set up greeting-service to register
+
+.Either continue on with the greeting-service from lab04, or use the starter in the lab05 directory.
+
+The Lab05 service-registry project is located here:
++
+[source, bash]
+---------------------------------------------------------------------
+CN-Workshop-Boeing-workspace:
+├── labs
+│   ├── lab05
+│   │   ├── service-registry
+---------------------------------------------------------------------
+
+. Review the `greeting-service/src/main/resources/bootstrap.yml` file. The name of this app is `greeting-service`. It also uses the `config-server`.
+```yml
+ spring:
+   application:
+     name: greeting-service
+```
+`spring.application.name` is the name the application will use when registering with Eureka.
+
+. Review the `greeting-service/pom.xml` file. By adding spring-cloud-starter-eureka to the classpath this application is eligible to register and discover services with the service-registry.
+
+```xml
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-eureka</artifactId>
+    </dependency>
+```
+
+. Review the following file: `greeting-service/src/main/java/io/pivotal/GreetingServiceApplication.java`. Notice the `@EnableDiscoveryClient`. This enables a discovery client that registers the fortune-service with the `service-registry` application.
+
+[source,java]
+----
+@SpringBootApplication
+@EnableDiscoveryClient
+public class GreetingServiceApplication {
+
+    public static void main(String[] args) {
+        SpringApplication.run(FortuneServiceApplication.class, args);
+    }
+}
+----
+
+. Open a new terminal window. Start the greeting-service
+
+```bash
+$ cd greeting-service
+$ mvn clean spring-boot:run
+```
+. After the a few moments, check the `service-registry` dashboard. Confirm the `greeting-service` is registered. 
+
+TIP: The Eureka Dashboard may report a warning, because we aren’t setup with multiple peers. This can safely be ignored. warning
+
+
+
+=== Set up greeting-ui
+
+In the greeting-ui app we'll create the simple frontend that will contact the service.
+
+. Load the greeting-ui project into STS/Eclipse.
++
+[source, bash]
+---------------------------------------------------------------------
+CN-Workshop-Boeing-workspace:
+├── labs
+│   ├── lab05
+│   │   ├── greeting-ui
+---------------------------------------------------------------------
+
+. Open `greeting-ui/pom.xml` file. Add spring-cloud-starter-eureka and spring-cloud-starter-zuul to the classpath so this application is eligible to register and discover services with the service-registry, and proxy requests from the JavaScrip app.
+
+```xml
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-eureka</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.cloud</groupId>
+      <artifactId>spring-cloud-starter-zuul</artifactId>
+    </dependency>
+```
+
+. Allow the application to discover services by adding @EnableEurekaServer to the main app file.
+`greeting-ui/src/main/java/io/pivotal/GreetingUiApplication.java`
++
+[source,java]
+----
+@SpringBootApplication
+@EnableDiscoveryClient
+@EnableZuulProxy
+public class GreetingUiApplication {
+
+  public static void main(String[] args) {
+    SpringApplication.run(GreetingUiApplication.class, args);
+  }
+}
+----
+
+. Open bootstrap.yml and set the app name to greeting-ui.  `greeting-ui/src/main/resources/bootstrap.yml`
++
+``` yml
+spring:
+  application:
+    name: greeting-ui
+```
+
+. Open application.yml and set the port to 8081.  `greeting-ui/src/main/resources/application.yml`
++
+[source,yaml]
+--------
+server:
+  port: 8081
+--------
+
+=== Add the JavaScript front end
+
+We will use a modern JavaScript library called Polymer from Google.  For convienence the the libraries are already in the project loaded using bower.
+
+. Create an elements directory in the static directory.  `greeting-ui/src/main/resources/static/elements`
+
+. Create a file message-display.html in the elements direcory with the following content.  `greeting-ui/src/main/resorces/static/elements/message-display.html`
+[source, html]
+---------------------------------------------------------------------
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<dom-module id="message-display">
+
+  <style>
+  div.bubble {
+    margin: 20px;
+    padding: 20px 20px;
+    border-radius: 20px;
+    background-color: #f1f1f1;
+  }
+  </style>
+  
+  <template>
+    <iron-ajax id="dataService"
+               url="/greeting-service/greeting"
+               on-response="updateData"></iron-ajax>
+    <div class="bubble">
+    Message: <span>[[message]]</span><br>
+    <paper-button on-click="getData">Get That Message</paper-button>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: "message-display",
+      properties: {
+      message: {
+          value: "argle flargle"
+        }
+      },
+      getData: function() {
+        this.$.dataService.generateRequest();
+      },
+      updateData: function(theResponse) {
+        this.message = theResponse.detail.response.greeting;
+      }
+    });
+  </script>
+
+</dom-module>
+---------------------------------------------------------------------
+
+The details aren't important, but notice the Ajax call that goes back to the originating server, and the response come back and gets loaded into the message data structure.
+
+. Finally, create an index.html file in the static directory.  `greeting-ui/src/main/resources/index.html`
++
+[source,html]
+----------
+<html>
+  <head>
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="elements/message-display.html">
+  </head>
+  <body>
+    <message-display></message-display>
+  </body>
+</html>
+----------
+
+This top level interface uses the Web Component that is the message-display.html.
+
+. Start the application
++
+[source,bash]
+------------
+$ mvn spring-boot:run
+------------
+
+. Hit the page at http://localhost:8081/   Click the button, and it should retrieve the greeting from the service.
+
+Notice that you can also hit the service by the same URL that the JavaScript uses:  http://localhost:8081/greeting-service/greeting
+
+The Zuul proxy retrievs the list of services from Eureka, and creates a proxy for them as though they were hosted on the server delivering the UI.  This means there aren't the Cross Site Request Forgery issues that you have when you have to hit the services directly.
+
+
+
+
+
+
+
+
+
+
+
+1) Review the the following file:
+`$SPRING_CLOUD_SERVICES_LABS_HOME/greeting-ribbon-rest/src/main/java/io/pivotal/greeting/GreetingController.java`. Notice the `RestTemplate`. It is not the usual `RestTemplate`, it is load balanced by Ribbon. The `@LoadBalanced` annotation is a qualifier to ensure we get the load balanced `RestTemplate` injected. This further simplifies application code.
+[source,java]
+----
+@Controller
+public class GreetingController {
+
+	Logger logger = LoggerFactory
+			.getLogger(GreetingController.class);
+
+
+
+
+	@Autowired
+	@LoadBalanced
+	private RestTemplate restTemplate;
+
+	@RequestMapping("/")
+	String getGreeting(Model model){
+
+		logger.debug("Adding greeting");
+		model.addAttribute("msg", "Greetings!!!");
+
+
+  	String fortune = restTemplate.getForObject("http://fortune-service", String.class);
+
+		logger.debug("Adding fortune");
+		model.addAttribute("fortune", fortune);
+
+		//resolves to the greeting.vm velocity template
+		return "greeting";
+	}
+
+
+}
+----
+
+2) Open a new terminal window. Start the `greeting-ribbon-rest` app.
+```bash
+$ cd $SPRING_CLOUD_SERVICES_LABS_HOME/greeting-ribbon-rest
+$ mvn clean spring-boot:run
+```
+3) After the a few moments, check the `service-registry` dashboard at http://localhost:8761. Confirm the `greeting-ribbon-rest` app is registered.
+
+4) Browse to http://localhost:8080/ to the `greeting-ribbon-rest` application. Confirm you are seeing fortunes. Refresh as desired. Also review the terminal output for the `greeting-ribbon-rest` app.
+
+5) When done stop the `config-server`, `service-registry`, `fortune-service` and `greeting-ribbon-rest` applications.
+
+=== Deploy the `greeting-ribbon-rest `to PCF
+
+1) If using the route registration method, in your fork of the `app-config` repo add an additional section `ribbon.IsSecure` to the `$APP_CONFIG_REPO_HOME/application.yml` file as seen below and push back to GitHub. If using the direct method then skip this step.
+```yml
+security:
+  basic:
+    enabled: false
+
+management:
+  security:
+    enabled: false
+
+logging:
+  level:
+    io:
+      pivotal: DEBUG
+
+ribbon: # <---NEW SECTION
+  IsSecure: false
+```
+
+=== Pivotal Cloud Foundry with HTTPS Only
+
+TIP: If your Pivotal Cloud Foundry environment has been configured to only accept HTTPS traffic and is using the route registration method then skip this step, however you will need to change all Ribbon code examples moving forward in the labs that use http to https before deploying to your Pivotal Cloud Foundry environment.
+
+For instance, the `GreetingController` from above would have the following change:
+
+[source,java]
+----
+String fortune = restTemplate.getForObject("https://fortune-service", String.class);
+----
+
+2) Package and push the `greeting-ribbon-rest` application.
+```bash
+$ mvn clean package
+$ cf push greeting-ribbon-rest -p target/greeting-ribbon-rest-0.0.1-SNAPSHOT.jar -m 512M --random-route --no-start
+```
+3) Bind services for the `greeting-ribbon-rest` application.
+```bash
+$ cf bind-service greeting-ribbon-rest config-server
+$ cf bind-service greeting-ribbon-rest service-registry
+```
+TIP: You can safely ignore the message: Use ‘cf restage’ to ensure your env variable changes take effect message from the CLI. We don’t need to restage at this time.
+
+4) If using self signed certificates, set the CF_TARGET environment variable for the greeting-ribbon-rest application.
+
+$ cf set-env greeting-ribbon-rest CF_TARGET <your api endpoint - make sure it starts with "https://">
+
+TIP: You can safely ignore the message: Use ‘cf restage’ to ensure your env variable changes take effect message from the CLI. We don’t need to restage at this time.
+
+5) Start the greeting-ribbon-rest app.
+
+$ cf start greeting-ribbon-rest
+
+6) After the a few moments, check the service-registry. Confirm the greeting-ribbon-rest app is registered.
+
+7) Refresh the greeting-ribbon-rest / endpoint.
+
+[NOTE]
+====
+*About This Lab*
+
+If services (e.g. `fortune-service`) are registering using the first Cloud Foundry URI (using the route registration method) this means that requests to them are being routed through the router and subsequently load balanced at that layer. Therefore, client side load balancing doesn’t occur.
+
+Pivotal Cloud Foundry has recently added support for allowing cross container communication. This will allow applications to communicate with each other without passing through the router. As applied to client-side load balancing, services such as `fortune-service` would register with Eureka using their container IP addresses. Allowing clients to reach them without going through the router. This is known as using the direct registration method.
+====
+
+*Congratulations!* You’ve just learned how to use Spring Cloud Service Load Balancing

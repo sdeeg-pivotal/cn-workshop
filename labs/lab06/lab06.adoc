@@ -1,0 +1,116 @@
+= Spring Cloud Netflix: Load Balancing and Circuit Breaker
+
+=== Start the `service-registry`, and `greeting-service`
+
+. Using either the projects from lab05 or the starters in lab06, start the registry-server
++
+```bash
+$ cd service-registry
+$ mvn clean spring-boot:run
+```
+
+3) Start the `greeting-service`
+```bash
+$ cd greeting-service
+$ mvn clean spring-boot:run
+```
+
+=== Set up `greeting-hystrix`
+
+. Open the `greeting-service/pom.xml` file, and add `spring-cloud-starter-hystrix` to the classpath to eligible to use circuit breakers via Hystrix.
+```xml
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-hystrix</artifactId>
+</dependency>
+```
+
+. Create the class _io.pivotal.Greeting_ (/greeting-ui/src/main/java/io/pivotal/Greeting.java).
++
+[source, java, numbered]
+---------------------------------------------------------------------
+package io.pivotal;
+
+public class Greeting {
+
+  public String greeting = "default";
+}
+---------------------------------------------------------------------
+
+. Create a new @Service class that will have a load balanced call to greeting-service `greeting-ui/src/main/java/io/pivotal/GreetingService.java`. Note the use of the `@EnableCircuitBreaker` annotation. This allows the application to create circuit breakers.
++
+[source,java]
+----
+package io.pivotal;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
+@Service
+@EnableCircuitBreaker
+public class GreetingService {
+    @Autowired
+    private LoadBalancerClient loadBalancer;
+
+    @HystrixCommand(fallbackMethod = "defaultGreeting")
+    public Greeting getGreeting() {
+        String url = loadBalancer.choose("greeting-service").getUri().toString() + "/greeting";
+        return (new RestTemplate()).getForObject(url, Greeting.class);
+    }
+
+    public Greeting defaultGreeting() {
+        Greeting greeting = new Greeting();
+        greeting.greeting = "Something happened";
+        return greeting;
+    }
+}
+----
+
+. Create an @RestController class that will use the GreetingService class `greeting-ui/src/main/java/io/pivotal/GreetingCotroller.java`.
++
+[source,java]
+----
+package io.pivotal;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class GreetingController {
+
+    @Autowired
+    private GreetingService greetingService;
+    
+    @RequestMapping("/greeting")
+    public Greeting greeting() {
+        return greetingService.getGreeting();
+    }
+}
+----
+
+. Update the message-component to call the new local greeting endpoint. You're only changing the url part of the iron-ajax control.  `greeting-ui/src/resources/static/elements/message-display.html`.
+[source, html]
+-------------
+    <iron-ajax id="dataService"
+               url="/greeting"
+               on-response="updateData"></iron-ajax>
+-------------
+
+. Start the greeting-ui application
++
+[source,bash]
+---------------------------------------------------------------------
+$ mvn clean spring-boot:run
+---------------------------------------------------------------------
+
+. Hit the web page, click the button, and you should see the service message as normal.
+
+. Kill the greeting-service
+
+. Click the button again, and you will now see the message as delivered by the fallback method.
