@@ -1,9 +1,4 @@
-= Pivotal Cloud Native Applications Workshop
-== Overview
-[.lead]
-This one day hands-on classroom style session will provide developers with hands on experience building cloud native applications using micro service architectures, Spring Boot, and Spring Cloud. The session includes presentations, demos and hands on labs.
-
-== Schedule
+= Pivotal Cloud Native Applications Workshop Agenda
 
 09:30 AM - 10:00 AM::
  * Welcome and Agenda
@@ -28,10 +23,9 @@ This one day hands-on classroom style session will provide developers with hands
 02:30 PM - 03:15 PM::
   * Session 7: Micro-proxy
   * Lab 7: link:labs/lab07/lab07.adoc[_Zuul Micro-proxy_]
-03:15 PM - 03:45 PM::
+03:15 PM - 04:00 PM::
   * Session 8: Sleuth/Zipkin
   * Lab 8: link:labs/lab08/lab08.adoc[_Logging and Tracing_]
-03:45 PM - 04:30 PM::
+04:00 PM - 04:30 PM::
   * Session 9: Deploying and Operating on PCF
-  * Lab 9: link:labs/lab09/lab09.adoc[_Apps on PCF_]
-4:30 PM - 4:45 PM:: Wrap-Up and Closing
+04:30 PM - 04:45 PM:: Wrap-Up and Closing
