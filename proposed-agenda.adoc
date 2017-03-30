@@ -1,18 +1,32 @@
-= Pivotal Cloud Native Applications Workshop Agenda
+= Pivotal Cloud Native Applications Workshop
+== Overview
+[.lead]
+This one day, hands-on, classroom style session will provide developers with experience building cloud native applications using micro service architectures, Spring Boot, and Spring Cloud. The session includes presentations, demos, and hands on labs.
 
-09:30 AM - 10:00 AM::
+Below is a sample agenda.  It makes for a packed day, we we work with clients to tailor an agenda that fits
+their needs.  We can cut, add, and/or split these topics as necessary.  Actual workshop agenda is in agenda-actual.
+
+CURRENT WORKSHOP AGENDA => link:agenda-actual.adoc[_HERE_]
+
+== Schedule
+
+08:00 AM - 08:45 AM::
  * Welcome and Agenda
  * Overview: Cloud Native Design, Domain Driven Design, & Microservices
-10:00 AM - 10:45 AM::
+08:45 AM - 09:30 AM::
  * Session 1: Introducing Spring and Spring Boot
  * Lab 1: link:labs/lab01/lab01.adoc[Building A Spring Boot Application]
-10:45 AM - 11:30 AM::
+09:30 AM - 10:15 AM::
  * Session 2: Advancing Spring Boot with Actuator and Profiles
  * Lab 2: link:labs/lab02/lab02.adoc[_Actuator and Profiles_]
-11:30 AM - 12:15 AM::
+10:15 AM - 11:30 AM:: Break
+10:30 AM - 11:15 AM::
+  * Session 3: Accessing Data from Databases
+  * Lab 4: link:labs/lab03/[_Spring Data ReST_]
+11:15 AM - 12:00 AM::
   * Session 4: Introduction to Spring Cloud
   * Lab 4: link:labs/lab04/lab04.adoc[_Adding Remote Configuration_]
-12:15 PM - 12:45 PM:: Lunch
+12:00 PM - 12:45 PM:: Lunch
 12:45 PM - 01:30 PM::
   * Session 5: Service Discovery & Load Balancing
   * Lab 5: link:labs/lab05/lab05.adoc[_Service Discovery and Load Balancing_]
@@ -26,6 +40,7 @@
 03:15 PM - 04:00 PM::
   * Session 8: Sleuth/Zipkin
   * Lab 8: link:labs/lab08/lab08.adoc[_Logging and Tracing_]
-04:00 PM - 04:30 PM::
+04:00 PM - 04:45 PM::
   * Session 9: Deploying and Operating on PCF
-04:30 PM - 04:45 PM:: Wrap-Up and Closing
+  * Lab 9: link:labs/lab09/lab09.adoc[_Apps on PCF_]
+04:45 PM - 05:00 PM:: Wrap-Up and Closing
