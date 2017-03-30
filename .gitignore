@@ -23,6 +23,12 @@ git.properties
 log/
 target/
 
+# Maven Wrapper
+mvnw
+mvnw.cmd
+.mvnw
+maven-wrapper*
+
 # Gradle
 /build/
 /bin/
