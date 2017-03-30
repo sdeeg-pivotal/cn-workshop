@@ -5,11 +5,6 @@ This one day hands-on classroom style session will provide developers with hands
 
 == Schedule
 
-skip JPA
-Zuul/Feign
-Deploy to CF
-Blue/Green
-
 09:30 AM - 10:00 AM::
  * Welcome and Agenda
  * Overview: Cloud Native Design, Domain Driven Design, & Microservices
