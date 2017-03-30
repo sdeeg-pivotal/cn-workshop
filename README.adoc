@@ -9,7 +9,7 @@ version of the general agenda found link:proposed-agenda.adoc[_HERE_].
 == Prerequisits
 
 * Clone this repo somewhere convenient
-* Install STS (or other IDE of your choice)
+* Install link:https://spring.io/tools[STS] (or other IDE of your choice)
 * Java 8
 * Cloud Foundry CLI tool: link:https://docs.pivotal.io/pivotalcf/1-10/cf-cli/install-go-cli.html[Instructions]
 
