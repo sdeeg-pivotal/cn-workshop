@@ -25,8 +25,8 @@ Select File > Import… Then select Maven > Existing Maven Projects. On the Impo
 
 . Create a Greeting class to hold our domain.  There's nothing "Springy" about it (yet).
 +
-[source, java, numbered]
-Greeting.java
+[source, java]
+.Greeting.java
 ---------------------------------------------------------------------
 package io.pivotal.dom;
 
@@ -40,7 +40,7 @@ public class Greeting {
 . Create a GreetingServiceConfiguration class
 +
 [source, java, numbered]
-GreetingServiceConfig.java
+.GreetingServiceConfig.java
 ---------------------------------------------------------------------
 package io.pivotal.config;
 
@@ -63,7 +63,7 @@ public class GreetingServiceConfig {
 . Create a GreetingServiceController class and add @RestController annotation.  Also add member to store a Greeting object.
 +
 [source, java, numbered]
-GreetingServiceController.java
+.GreetingServiceController.java
 ---------------------------------------------------------------------
 package io.pivotal.api;
 
@@ -99,6 +99,7 @@ public class GreetingServiceController {
 Completed:
 +
 [source,java]
+.GreetingServiceController.java
 ---------------------------------------------------------------------
 package io.pivotal.api;
 
