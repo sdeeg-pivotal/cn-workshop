@@ -3,10 +3,8 @@
 [.lead]
 This one day, hands-on, classroom style session will provide developers with experience building cloud native applications using micro service architectures, Spring Boot, and Spring Cloud. The session includes presentations, demos, and hands on labs.
 
-Below is a sample agenda.  It makes for a packed day, we we work with clients to tailor an agenda that fits
-their needs.  We can cut, add, and/or split these topics as necessary.  Actual workshop agenda is in agenda-actual.
-
-CURRENT WORKSHOP AGENDA => link:agenda-actual.adoc[_HERE_]
+Below is a sample agenda.  It makes for a packed day, and we work with clients to tailor an agenda that fits
+their needs.  We will cut, add, and/or split these topics as necessary.
 
 == Schedule
 
@@ -22,7 +20,7 @@ CURRENT WORKSHOP AGENDA => link:agenda-actual.adoc[_HERE_]
 10:15 AM - 11:30 AM:: Break
 10:30 AM - 11:15 AM::
   * Session 3: Accessing Data from Databases
-  * Lab 4: link:labs/lab03/[_Spring Data ReST_]
+  * Lab 4: link:labs/lab03/README.md[_Spring Data ReST_]
 11:15 AM - 12:00 AM::
   * Session 4: Introduction to Spring Cloud
   * Lab 4: link:labs/lab04/lab04.adoc[_Adding Remote Configuration_]
@@ -42,5 +40,4 @@ CURRENT WORKSHOP AGENDA => link:agenda-actual.adoc[_HERE_]
   * Lab 8: link:labs/lab08/lab08.adoc[_Logging and Tracing_]
 04:00 PM - 04:45 PM::
   * Session 9: Deploying and Operating on PCF
-  * Lab 9: link:labs/lab09/lab09.adoc[_Apps on PCF_]
 04:45 PM - 05:00 PM:: Wrap-Up and Closing
