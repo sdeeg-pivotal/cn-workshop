@@ -1,0 +1,178 @@
+= Building a Spring Boot Application
+
+== Create a Spring Boot Project
+
+. If you haven't already, download this git repo and unpack it someplace convenient.
+
++
+Lab01 starter project is located here:
++
+[source, bash]
+---------------------------------------------------------------------
+cn-workshop:
+├── labs
+│   ├── lab01
+│   │   ├── greeting-service
+---------------------------------------------------------------------
+
+. Create a new project with Initializer called greeting-service, or import the project into your editor/IDE of choice.
++
+*_STS Import Help:_*
++
+Select File > Import… Then select Maven > Existing Maven Projects. On the Import Maven Projects page, browse to the /greeting-service directory (e.g. cn-workshop/labs/lab01/greeting-service)
+
+== Create a Domain
+
+. Create a Greeting class to hold our domain.  There's nothing "Springy" about it (yet).
++
+[source, java, numbered]
+Greeting.java
+---------------------------------------------------------------------
+package io.pivotal.dom;
+
+public class Greeting {
+  public String greeting = "hello, world";
+}
+---------------------------------------------------------------------
+
+== Configure the App
+
+. Create a GreetingServiceConfiguration class
++
+[source, java, numbered]
+GreetingServiceConfig.java
+---------------------------------------------------------------------
+package io.pivotal.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import io.pivotal.dom.Greeting;
+
+@Configuration
+public class GreetingServiceConfig {
+  @Bean
+  public Greeting createGreeting() {
+    return new Greeting();
+  }
+}
+---------------------------------------------------------------------
+
+== Add an Endpoint
+
+. Create a GreetingServiceController class and add @RestController annotation.  Also add member to store a Greeting object.
++
+[source, java, numbered]
+GreetingServiceController.java
+---------------------------------------------------------------------
+package io.pivotal.api;
+
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+public class GreetingServiceController {
+    private Greeting greeting;
+}
+---------------------------------------------------------------------
+
+. Create a constructer to inject the Greeting bean created by the config class.
++
+[source,java]
+---------------------------------------------------------------------
+  public GreetingServiceController(Greeting greeting) {
+    super();
+    this.greeting = greeting;
+  }
+---------------------------------------------------------------------
+
+. Add the following request handler respond to GET requests on /greeting and return the Greeting instance.
++
+[source,java]
+---------------------------------------------------------------------
+  @GetMapping("/greeting")
+  public Greeting greeting() {
+      return greeting;
+  }
+---------------------------------------------------------------------
+
++
+Completed:
++
+[source,java]
+---------------------------------------------------------------------
+package io.pivotal.api;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.pivotal.dom.Greeting;
+
+@RestController
+public class GreetingServiceController {
+  private Greeting greeting;
+  
+  public GreetingServiceController(Greeting greeting) {
+    super();
+    this.greeting = greeting;
+  }
+
+  @GetMapping("/greeting")
+  public Greeting greeting() {
+      return greeting;
+  }
+}
+---------------------------------------------------------------------
+
+== Run the Application
+
+. In a terminal, change working directory to *cn-workshop/labs/lab01/hello-spring-boot*
++
+$ cd <cn-workshop>/labs/lab01/greeting-service
+
+. Run the application
++
+[source,bash]
+---------------------------------------------------------------------
+$ mvn clean package
+$ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar
+
+or
+
+$ mvn clean spring-boot:run
+---------------------------------------------------------------------
+
+. You should see the application start up an embedded Apache Tomcat server on port 8080 (review terminal output):
++
+---------------------------------------------------------------------
+...
+2017-03-30 16:02:10.510  INFO 85077 --- [           main] s.b.c.e.t.TomcatEmbeddedServletContainer : Tomcat started on port(s): 8080 (http)
+2017-03-30 16:02:10.513  INFO 85077 --- [           main] io.pivotal.GreetingServiceApplication    : Started GreetingServiceApplication in 2.98 seconds (JVM running for 3.341)
+---------------------------------------------------------------------
+
+. Browse to http://localhost:8080/greeting
+
+. Stop the application. In the terminal window: *Ctrl + C*
+
+== Deploy to Pivotal Cloud Foundry
+
+. Create an application manifest in the root folder
++
+. Add application metadata.  Change the name to something unique, like adding your initials.
++
+[source, yaml]
+---------------------------------------------------------------------
+---
+applications:
+- name: greeting-service-YOUR-INITIALS
+  memory: 512M
+  instances: 1
+  path: ./target/greeting-service-0.0.1-SNAPSHOT.jar
+---------------------------------------------------------------------
+
+. Push application into Cloud Foundry
++
+$ cf push
+
+. Find the URL created for your app in the health status report. Browse to your app.
+
+*Congratulations!* You’ve just completed your first Spring Boot application.
