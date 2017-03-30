@@ -6,7 +6,7 @@ This one day, hands-on, classroom style session will provide developers with exp
 Below is a sample agenda.  It makes for a packed day, we we work with clients to tailor an agenda that fits
 their needs.  We can cut, add, and/or split these topics as necessary.  Actual workshop agenda is in agenda-actual.
 
-CURRENT WORKSHOP AGENDA ==> link:agenda-actual.adoc[_HERE_]
+CURRENT WORKSHOP AGENDA => link:agenda-actual.adoc[_HERE_]
 
 == Schedule
 
@@ -22,7 +22,7 @@ CURRENT WORKSHOP AGENDA ==> link:agenda-actual.adoc[_HERE_]
 10:15 AM - 11:30 AM:: Break
 10:30 AM - 11:15 AM::
   * Session 3: Accessing Data from Databases
-  * Lab 4: link:labs/lab03/lab03.adoc[_Spring Data ReST_]
+  * Lab 4: link:labs/lab03/[_Spring Data ReST_]
 11:15 AM - 12:00 AM::
   * Session 4: Introduction to Spring Cloud
   * Lab 4: link:labs/lab04/lab04.adoc[_Adding Remote Configuration_]
