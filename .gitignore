@@ -6,9 +6,12 @@
 git.properties
 
 # Eclipse
+.apt_generated
 .classpath
+.factorypath
 .project
-.settings/
+.settings
+.springBeans
 
 # Intellij
 .idea/
