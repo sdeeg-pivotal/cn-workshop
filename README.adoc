@@ -6,6 +6,13 @@ This one day, hands-on, classroom style session will provide developers with exp
 Below is the schedule for the workshop currently being delivered which is likely a modified 
 version of the general agenda found link:proposed-agenda.adoc[_HERE_].
 
+== Prerequisits
+
+* Clone this repo somewhere convenient
+* Install STS (or other IDE of your choice)
+* Java 8
+* Cloud Foundry CLI tool: link:https://docs.pivotal.io/pivotalcf/1-10/cf-cli/install-go-cli.html[Instructions]
+
 == Schedule
 
 09:30 AM - 10:00 AM::
