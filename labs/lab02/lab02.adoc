@@ -9,7 +9,7 @@ Load the project into STS/Eclipse
 +
 [source,bash]
 ---------------------------------------------------------------------
-CN-Workshop-Boeing-workspace:
+cn-workshop:
 ├── labs
 │   ├── lab02
 │       └── hello-spring-boot-actuator
@@ -70,7 +70,7 @@ Spring Boot provides an endpoint (http://localhost:8080/info) that allows the ex
 
 One thing that _actuator_ does well is expose information about the specific build and version control coordinates for a given deployment.
 
-. Edit the following file: *CN-Workshop-Boeing-workspace/labs/lab02/hello-spring-boot-actuator/pom.xml*. Add the _git-commit-id-plugin_ to your Maven build. You must edit the file. The _git-commit-id-plugin_ adds Git branch and commit coordinates to the */info* endpoint:
+. Edit the following file: *cn-workshop/labs/lab02/hello-spring-boot-actuator/pom.xml*. Add the _git-commit-id-plugin_ to your Maven build. You must edit the file. The _git-commit-id-plugin_ adds Git branch and commit coordinates to the */info* endpoint:
 +
 [source, xml]
 ---------------------------------------------------------------------

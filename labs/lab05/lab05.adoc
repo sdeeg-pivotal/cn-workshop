@@ -82,7 +82,7 @@ The Lab05 service-registry project is located here:
 +
 [source, bash]
 ---------------------------------------------------------------------
-CN-Workshop-Boeing-workspace:
+cn-workshop:
 ├── labs
 │   ├── lab05
 │   │   ├── service-registry
@@ -139,7 +139,7 @@ In the greeting-ui app we'll create the simple frontend that will contact the se
 +
 [source, bash]
 ---------------------------------------------------------------------
-CN-Workshop-Boeing-workspace:
+cn-workshop:
 ├── labs
 │   ├── lab05
 │   │   ├── greeting-ui

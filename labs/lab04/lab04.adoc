@@ -7,7 +7,7 @@ Load the greeting-service project into STS/Eclipse
 +
 [source, bash]
 ---------------------------------------------------------------------
-CN-Workshop-Boeing-workspace:
+cn-workshop:
 ├── labs
 │   ├── lab04
 │   │   ├── greeting-service
@@ -83,7 +83,7 @@ public class GreetingController {
 
 == Run the _greeting-service_ Application
 
-. In a terminal, change working directory to *CN-Workshop-Boeing-workspace/labs/lab04/greeting-service*
+. In a terminal, change working directory to *cn-workshop/labs/lab04/greeting-service*
 
 . Run the application
 +
@@ -112,13 +112,13 @@ Load the config-service project into STS/Eclipse if you like
 +
 [source, bash]
 ---------------------------------------------------------------------
-CN-Workshop-Boeing-workspace:
+cn-workshop:
 ├── labs
 │   ├── lab04
 │   │   ├── config-server
 ---------------------------------------------------------------------
 
-. Review the following file: `CN-Workshop-Boeing-workspace/labs/lab04/config-server/pom.xml` By adding `spring-cloud-config-server` to the classpath, this application is eligible to embed a `config-server`.
+. Review the following file: `cn-workshop/labs/lab04/config-server/pom.xml` By adding `spring-cloud-config-server` to the classpath, this application is eligible to embed a `config-server`.
 +
 [source, xml]
 ----
@@ -129,7 +129,7 @@ CN-Workshop-Boeing-workspace:
 ----
 
 . Make the application a config server by enabling it with the @EnableConfigServer:
-`CN-Workshop-Boeing-workspace/labs/lab04/config-server/src/main/java/io/pivotal/ConfigServerApplication.java`
+`cn-workshop/labs/lab04/config-server/src/main/java/io/pivotal/ConfigServerApplication.java`
 +
 [source, java]
 ---------------------------------------------------------------------
@@ -143,7 +143,7 @@ public class ConfigServerApplication {
 }
 ---------------------------------------------------------------------
 
-. Set the GitHub repository for the `config-server`. This will be the source of the configuration data. Edit the `CN-Workshop-Boeing-workspace/labs/lab04/config-server/src/main/resources/application.yml` file
+. Set the GitHub repository for the `config-server`. This will be the source of the configuration data. Edit the `cn-workshop/labs/lab04/config-server/src/main/resources/application.yml` file
 +
 [source, yaml]
 ---------------------------------------------------------------------

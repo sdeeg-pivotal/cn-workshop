@@ -6,7 +6,7 @@ Load the data-jpa-spring-boot project into STS/Eclipse
 +
 [source, bash]
 ---------------------------------------------------------------------
-CN-Workshop-Boeing-workspace:
+cn-workshop:
 ├── labs
 │   ├── lab03
 │   │   ├── data-jpa-spring-boot
@@ -253,9 +253,9 @@ public class DataJpaSpringBootApplication {
 
 == Run the _data-jpa-spring-boot_ Application
 
-. In a terminal, change working directory to *CN-Workshop-Boeing-workspace/labs/lab03/data-jpa-spring-boot*
+. In a terminal, change working directory to *cn-workshop/labs/lab03/data-jpa-spring-boot*
 +
-$ cd CN-Workshop-Boeing-workspace/labs/lab03/data-jpa-spring-boot
+$ cd cn-workshop/labs/lab03/data-jpa-spring-boot
 
 . Run the application
 +

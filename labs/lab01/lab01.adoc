@@ -9,7 +9,7 @@ Lab01 is located here:
 +
 [source, bash]
 ---------------------------------------------------------------------
-CN-Workshop-Boeing-workspace:
+cn-workshop:
 ├── labs
 │   ├── lab01
 │   │   ├── hello-spring-boot
@@ -19,7 +19,7 @@ CN-Workshop-Boeing-workspace:
 +
 *_STS/Eclipse Import Help:_*
 +
-Select File > Import… Then select Maven > Existing Maven Projects. On the Import Maven Projects page, browse to the /hello-spring-boot directory (e.g. CN-Workshop-Boeing-workspace/labs/lab01/hello-spring-boot)
+Select File > Import… Then select Maven > Existing Maven Projects. On the Import Maven Projects page, browse to the /hello-spring-boot directory (e.g. cn-workshop/labs/lab01/hello-spring-boot)
 
 == Add an Endpoint
 
@@ -81,9 +81,9 @@ public class HelloSpringBootApplication {
 
 == Run the _hello-spring-boot_ Application
 
-. In a terminal, change working directory to *CN-Workshop-Boeing-workspace/labs/lab01/hello-spring-boot*
+. In a terminal, change working directory to *cn-workshop/labs/lab01/hello-spring-boot*
 +
-$ cd /CN-Workshop-Boeing-workspace/labs/lab01/hello-spring-boot
+$ cd /cn-workshop/labs/lab01/hello-spring-boot
 
 . Run the application
 +
