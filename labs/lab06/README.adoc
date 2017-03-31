@@ -10,7 +10,7 @@ In this lab we will add a SPA front end and create a local end point in the Gree
 ---------------------------------------------------------------------
 cn-workshop
 ├── labs
-│   ├── lab05
+│   ├── lab06
 │   │   ├── greeting-service
 │   │   ├── greeting-ui
 cn-workshop
