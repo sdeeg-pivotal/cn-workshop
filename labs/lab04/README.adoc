@@ -1,10 +1,11 @@
-= Spring Cloud Config
+= Application Configuration and Spring Cloud Config
 
-Setup basic configuration for the service.  Then use config server.
+This lab will walk through the process of configuring a Spring app using properies.  Then we'll explore using a Spring Cloud Config server for centralized property management.  The repository will be located in a repo on github.  If you have git available locally, you can use your own local version.
 
-This lab will walk through the process of using a Spring Cloud Config server.  The repository will be located in a repo on github.  If you have git available locally, you can use your own local version.  The first thing we need is an appliation that has a property that we will eventually retrieve remotely.
+== Setup
 
-+
+You can continue on with the greeting-service from lab02 or load the starter.  The starter has removed the info/health/metrics.
+
 Load the greeting-service project into STS/Eclipse
 +
 [source, bash]
@@ -15,100 +16,71 @@ cn-workshop:
 │   │   ├── greeting-service
 ---------------------------------------------------------------------
 
-We'll start by creating a simple Greeting domain object that will display contain the value of a property, a Configuration class to create an instance of the Greeting, and a controller to return the value.
+== Load properties from application.yml
 
-. Add the property app.greeting in _application.yml_ (/greeting-service/src/main/resources/application.yml).
+. Add the property app.greeting in _application.yml_
 +
 [yaml]
+.application.yml
 ---------------------------------------------------------------------
 app:
   greeting: hello, world
 ---------------------------------------------------------------------
 
-. Create the class _io.pivotal.Greeting_ (/greeting-service/src/main/java/io/pivotal/Greeting.java).
+. Modify the Greeting class to load the propery or use a default value if it's not found.
 +
-[source, java, numbered]
+[source, java]
+.Greeting.java
 ---------------------------------------------------------------------
 package io.pivotal;
 
 import org.springframework.beans.factory.annotation.Value;
 
 public class Greeting {
-
   @Value("${app.greeting:Doh!}")
   public String greeting;
 }
 ---------------------------------------------------------------------
 
-. Create the @Configuration class _io.pivotal.GreetingConfig_ (/greeting-service/src/main/java/io/pivotal/GreetingConfig.java).
+. Run the application and see that it returns the expected value.
+
+== Change behavior with Profiles
+
+. Create a new file application-new.yml in the resources directory.  Override the greeting property.
+[yaml]
+.application-new.yml
+---------------------------------------------------------------------
+app:
+  greeting: hello, new world
+---------------------------------------------------------------------
+
+. Rebuild the application so it has the new property file.  Run the application setting the Spring Profile to "new"
 +
-[source, java, numbered]
----------------------------------------------------------------------
-package io.pivotal;
+[soruce,bash]
+----
+$ mvn clean package
+$ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar --spring.profiles.active=new
+----
 
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+. See that the property has been picked up from the profile
 
-@Configuration
-public class GreetingConfig {
-
-  @Bean
-  Greeting greeting() {
-    return new Greeting();
-  }
-}
----------------------------------------------------------------------
-
-. Create an @RestController class _io.pivotal.GreetingController_ (/greeting-service/src/main/java/io/pivotal/GreetingController.java).
+. Now look at the properties in the environment
 +
-[source, java, numbered]
----------------------------------------------------------------------
-package io.pivotal;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class GreetingController {
-
-  @Autowired
-  private Greeting greeting;
-
-  @RequestMapping("/greeting")
-  public Greeting greeting() {
-    return greeting;
-  }
-}
----------------------------------------------------------------------
-
-
-== Run the _greeting-service_ Application
-
-. In a terminal, change working directory to *cn-workshop/labs/lab04/greeting-service*
-
-. Run the application
-+
-$ mvn clean spring-boot:run
-
-. You should see the application start up an embedded Apache Tomcat server on port 8080 (review terminal output):
-
-Browse to http://localhost:8080/greeting
-
-Now look at the properties in the environment
-
 http://localhost:8080/env
 
-Notice that the property is listed along with the file that it came from.
-+
-[json]
----------------------------------------------------------------------
-  "applicationConfig: [classpath:/application.yml]": {
-    "app.greeting": "hello, world"
-  }
----------------------------------------------------------------------
+Notice that you can see the properties coming from both the files.
 
-=== Set up config-server
+== Set property from the CLI
+
+. Launch the applicaiton by setting the property on the CLI.  No reason to rebuild.
++
+----
+$ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar --spring.profiles.active=new --app.greeting=hello-cli
+----
+
+. See that the propery is now set to the value passed to the app.  Parameters from the environment take precedence over those contained in property files bundled in the app.  This is a good way to set things at run time based on the deployment environment.  You can also use Environment variables.  For our example the env var would be APP_GREETING.
+
+== Set up config-server
 
 Load the config-service project into STS/Eclipse if you like
 +
@@ -120,7 +92,7 @@ cn-workshop:
 │   │   ├── config-server
 ---------------------------------------------------------------------
 
-. Review the following file: `cn-workshop/labs/lab04/config-server/pom.xml` By adding `spring-cloud-config-server` to the classpath, this application is eligible to embed a `config-server`.
+. Review the following file: `cn-workshop/labs/lab04/config-server/pom.xml` By adding `spring-cloud-config-server` to the classpath, this application is eligible to run as a `config-server`.
 +
 [source, xml]
 ----
@@ -160,7 +132,7 @@ spring:
 #          uri: ${HOME}/dev/app-config
 ---------------------------------------------------------------------
 
-. Open a terminal window and start the `config-server`.
+. Open a terminal window and start the `config-server`, or launch from Boot Dashboard.
 ```bash
 $ mvn clean spring-boot:run
 ```
@@ -178,27 +150,60 @@ In this case, we are manually calling one of those endpoints `/{application}/{pr
 
 === Set up `greeting-service` to consume the remote config
 
-. Add the config client by uncommenting it in  _pom.xml_ (/greeting-service/pom.xml).
+. Add the config client in _pom.xml_.  Since we didn't use the initializer to do this, we'll also need to add the dependancy management for Spring Cloud.
 +
 [source, xml]
 ---------------------------------------------------------------------
-    <!-- Use this when consuming from the simple OSS Config Server -->
+<!-- put in dependencies block -- />
     <dependency>
-      <groupId>org.springframework.cloud</groupId>
-      <artifactId>spring-cloud-starter-config</artifactId>
+      <groupId>io.pivotal.spring.cloud</groupId>
+      <artifactId>spring-cloud-services-starter-config-client</artifactId>
     </dependency>
+<!-- end -- />
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>Dalston.RC1</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.pivotal.spring.cloud</groupId>
+        <artifactId>spring-cloud-services-dependencies</artifactId>
+        <version>1.4.1.RELEASE</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <repositories>
+    <repository>
+      <id>spring-milestones</id>
+      <name>Spring Milestones</name>
+      <url>https://repo.spring.io/milestone</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 ---------------------------------------------------------------------
 
 . Add the following properties to greeting-service/src/main/resources/bootstrap.yml
 +
 [source, yaml]
 ---------------------------------------------------------------------
+security:
+  basic:
+    enabled: false
 spring:
   application:
     name: greeting-service
-  cloud:
-    config:
-      uri: ${vcap.services.config-service.credentials.uri:http://localhost:8888}
+#  cloud:
+#    config:
+#      uri: ${vcap.services.config-service.credentials.uri:http://localhost:8888}
 ---------------------------------------------------------------------
 
 . Start the `greeting-service` and observe the top of the log output where it show attaching to the config server.
@@ -214,17 +219,4 @@ spring:
 . Stop the `greeting-config` application
 
 
-=== Override Configuration Values By Profile
-
-. Stop the `greeting-service` application using Command-C or CTRL-C in the terminal window.
-
-. Set the active profile to boeing in greeting-service/src/resources/application.yml.
-+
-[source, yaml]
----------------------------------------------------------------------
-spring:
-  profiles:
-    active: boeing
----------------------------------------------------------------------
-
-. Make sure the profile is set by browsing to the http://localhost:8080/env endpoint
+*Congratulations!* You’ve just added application configuration that is controllable and can be centrally managed.
