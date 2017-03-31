@@ -155,12 +155,12 @@ In this case, we are manually calling one of those endpoints `/{application}/{pr
 +
 [source, xml]
 ---------------------------------------------------------------------
-<!-- put in dependencies block -- />
+<!-- put in dependencies block --/>
     <dependency>
       <groupId>io.pivotal.spring.cloud</groupId>
       <artifactId>spring-cloud-services-starter-config-client</artifactId>
     </dependency>
-<!-- end -- />
+<!-- end --/>
 
   <dependencyManagement>
     <dependencies>
