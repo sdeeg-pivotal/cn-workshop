@@ -225,7 +225,7 @@ Spring Boot provides an endpoint http://localhost:8080/metrics that exposes seve
 ---------------------------------------------------------------------
 
 . Add a Simple Metric incrementor in our RestController
-
++
 [source,java]
 .GreetingServiceController.java
 ----
@@ -266,7 +266,10 @@ $ mvn clean package
 
 . Push application into Cloud Foundry
 +
+[source,bash]
+---------------------------------------------------------------------
 $ cf push
+---------------------------------------------------------------------
 
 . Find the URL created for your app in the health status report. Browse to your app.
 
