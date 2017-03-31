@@ -36,13 +36,13 @@ app:
 [source, java]
 .Greeting.java
 ---------------------------------------------------------------------
-package io.pivotal;
+package io.pivotal.dom;
 
 import org.springframework.beans.factory.annotation.Value;
 
 public class Greeting {
   @Value("${app.greeting:Doh!}")
-  public String greeting;
+  public String greeting = "hello, world";
 }
 ---------------------------------------------------------------------
 
