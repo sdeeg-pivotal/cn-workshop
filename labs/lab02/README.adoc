@@ -96,10 +96,8 @@ info: # add this section
     description: @project.description@
     version: @project.version@
 ---------------------------------------------------------------------
-
-These will add the project’s Maven coordinates to the /info endpoint. The Spring Boot Maven plugin will cause them to automatically be replaced in the assembled JAR.
 +
-*NOTE:* if STS reports a problem with the application.yml due to @ character the problem can safely be ignored.
+These will add the project’s Maven coordinates to the /info endpoint. The Spring Boot Maven plugin will cause them to automatically be replaced in the assembled JAR. (*NOTE:* STS reports a problem with the application.yml due to @ character the problem can safely be ignored.)
 
 . Build and run the application:
 +
