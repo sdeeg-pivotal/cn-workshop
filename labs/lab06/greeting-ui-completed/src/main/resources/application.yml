@@ -1,0 +1,11 @@
+server:
+  port: ${PORT:8081}
+spring:
+  application:
+    name: greeting-ui
+security:
+  basic:
+    enabled: false
+management:
+  security:
+    enabled: false
