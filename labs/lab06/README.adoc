@@ -66,6 +66,7 @@ public class GreetingUIConfig {
 
 . Create a Controller with an end point for requests
 +
+[source,java]
 .GreetingUiApi.java
 ----
 package io.pivotal.api;
