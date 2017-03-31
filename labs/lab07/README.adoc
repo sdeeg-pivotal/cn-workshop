@@ -51,8 +51,10 @@ spring:
 . Start Zipkin Server
 
 . (Re)Start Greeting Service and Greeting UI
-
++
 You can see that Sleuth is working because of output in the logs that has this element "INFO [greeting-service,,,]"
+
+. Look at the greeting-service /greeting trace
 
 == Create a Span
 
