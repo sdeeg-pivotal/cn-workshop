@@ -5,6 +5,7 @@
 Spring Boot includes a number of additional features to help you monitor and manage your application when it’s pushed to production. These features are added by adding _spring-boot-starter-actuator_ to the classpath.  The completed exercise from lab01 has been copied to lab02, and we'll start with it.
 
 . If you don't have the project from lab01 already available, load the project into STS/Eclipse
++
 [source,bash]
 ---------------------------------------------------------------------
 cn-workshop:
@@ -14,7 +15,7 @@ cn-workshop:
 ---------------------------------------------------------------------
 
 . Add the Spring Boot Actuator dependency in pom.xml
-
++
 [source, xml]
 .pom.xml
 ---------------------------------------------------------------------
@@ -31,7 +32,7 @@ By default the Actuator endpoints are not accessible.  We'll set a property to t
 . Rename greeting-service/src/main/resources/application.properties to application.yml
 
 . Add the following property
-
++
 ----
 management:
   security:
@@ -85,7 +86,7 @@ Displays trace information (by default the last few HTTP requests).
 == Include Build Info
 
 . Add the following properties to application.yml
-
++
 [source, yaml]
 ---------------------------------------------------------------------
 info: # add this section
@@ -101,7 +102,7 @@ These will add the project’s Maven coordinates to the /info endpoint. The Spri
 *NOTE:* if STS reports a problem with the application.yml due to @ character the problem can safely be ignored.
 
 . Build and run the application:
-
++
 [source,bash]
 ---------------------------------------------------------------------
 $ mvn clean package
@@ -109,7 +110,7 @@ $ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar
 ---------------------------------------------------------------------
 
 . Browse to http://localhost:8080/info. Build information is now included. 
-
++
 [source,json]
 ---------------------------------------------------------------------
 {
