@@ -1,9 +1,105 @@
 = Spring Cloud Netflix: Circuit Breaker
 
+In this lab we will add a SPA front end and create a local end point in the Greeting UI application do pass on the results from the Greeting Service.  Then we'll add fault tolerance by using a Circuit Breaker (Hystrix) library to monitor requests and send failures to a fallback routine.
+
+== Setup
+
+. If you need, load the starters as in the other labs
++
+[source, bash]
+---------------------------------------------------------------------
+cn-workshop
+├── labs
+│   ├── lab05
+│   │   ├── greeting-service
+│   │   ├── greeting-ui
+cn-workshop
+├── scs-servers
+│   ├── config-server
+│   ├── registry-server
+---------------------------------------------------------------------
+
+. Start the Config and Registry services
+
+. Start Greeting Service
+
+== Create the Local Endpoint to server Greetings
+
+. Start by creating a local version of Greeting with constructor/getter/setter, and which doesn't load a value from properties.
++
+[source, java]
+.Greeting.java
+---------------------------------------------------------------------
+package io.pivotal.dom;
+
+public class Greeting {
+    public String greeting = "default";
+
+    public Greeting() { }
+
+    public String getGreeting() {
+        return greeting;
+    }
+
+    public void setGreeting(String greeting) {
+        this.greeting = greeting;
+    }
+}
+---------------------------------------------------------------------
+
+. We need a utility class to use to call the Greeting Service.  Create a RestTemplate in the Config class to inject into our Controller.  Notice that it's LoadBalanced.  This means the template will balance calls to the different instances of the target service.
++
+[source,java]
+.GreetingUIConfig.java
+----
+@Configuration
+@EnableDiscoveryClient
+@EnableZuulProxy
+public class GreetingUIConfig {
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+----
+
+. Create a Controller with an end point for requests
++
+.GreetingUiApi.java
+----
+package io.pivotal.api;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import io.pivotal.dom.Greeting;
+
+@RestController
+public class GreetingUiApi {
+    private RestTemplate restTemplate;
+
+    public GreetingUiApi(RestTemplate restTemplate) {
+        super();
+        this.restTemplate = restTemplate;
+    }
+
+    @GetMapping("/greeting")
+    public Greeting getGreeting() {
+        Greeting greeting = restTemplate.getForObject("http://greeting-service/greeting", Greeting.class);
+        greeting.greeting += "-transformed";
+        return greeting;
+    }
+
+}
+----
+
+. Start the Greeting UI server and see that the new endpoint returns an approprite response from http://localhost:8081/greeting
 
 == Add a JavaScript front end
 
-We will use a modern JavaScript library called Polymer from Google.  The focus of the lab is not on JavaScript UI libraries, so a starter for the project with some frontend code already exists.  It uses the Google Polymer library, but any frontend technology that does AJAX is suitable.
+The app use a modern JavaScript library called Polymer from Google.  The focus of the lab is not on JavaScript UI libraries, so the starter for the project contains the necessary library code.  It uses the Google Polymer library, but any frontend technology that does AJAX is suitable.
 
 . In a Spring Boot application web resources are server up from the resources/static directory.  Create an index.html file in the resouces/static directory
 +
@@ -21,120 +117,84 @@ We will use a modern JavaScript library called Polymer from Google.  The focus o
 </html>
 ----------
 
-This top level interface uses a Web Component loaded from the file greeting-display.html.
+. You should not have to restart the Greeting UI server as html is statically served.  Hit the URL http://localhost:8081/ and the UI should come up.  Click the button to see the response.
 
+== Make the UI Fault Tolerant
 
-=== Start the `service-registry`, and `greeting-service`
-
-. Using either the projects from lab05 or the starters in lab06, start the registry-server
+. Open Greeting UI's pom.xml file, and add `spring-cloud-starter-hystrix` to the classpath to eligible to use circuit breakers via Hystrix.
 +
-```bash
-$ cd service-registry
-$ mvn clean spring-boot:run
-```
+[source,xml]
+.pom.xml
+----
+        <dependency>
+            <groupId>io.pivotal.spring.cloud</groupId>
+            <artifactId>spring-cloud-services-starter-circuit-breaker</artifactId>
+        </dependency>
+----
 
-3) Start the `greeting-service`
-```bash
-$ cd greeting-service
-$ mvn clean spring-boot:run
-```
-
-=== Set up `greeting-hystrix`
-
-. Open the `greeting-service/pom.xml` file, and add `spring-cloud-starter-hystrix` to the classpath to eligible to use circuit breakers via Hystrix.
-```xml
-<dependency>
-    <groupId>org.springframework.cloud</groupId>
-    <artifactId>spring-cloud-starter-hystrix</artifactId>
-</dependency>
-```
-
-. Create the class _io.pivotal.Greeting_ (/greeting-ui/src/main/java/io/pivotal/Greeting.java).
+. Enable Circuit Breakers in the Config class.  Also add a greeting to use as a fallback.
 +
-[source, java, numbered]
----------------------------------------------------------------------
-package io.pivotal;
-
-public class Greeting {
-
-  public String greeting = "default";
+[source,java]
+.GreetingUIConfig.java
+----
+@Configuration
+@EnableDiscoveryClient
+@EnableZuulProxy
+@EnableCircuitBreaker
+public class GreetingUIConfig {
+    @Bean
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+    
+    @Bean
+    public Greeting fallbackGreeting() {
+        Greeting fallback = new Greeting();
+        fallback.greeting = "Don't Panic!";
+        return fallback;
+    }
 }
----------------------------------------------------------------------
+----
 
-. Create a new @Service class that will have a load balanced call to greeting-service `greeting-ui/src/main/java/io/pivotal/GreetingService.java`. Note the use of the `@EnableCircuitBreaker` annotation. This allows the application to create circuit breakers.
+
+. Update the Controller class to indicate the end point is a Hystrix command, and what the fallback method is.  Also inject the fallback message created in the Config class.
 +
 [source,java]
 ----
-package io.pivotal;
+@RestController
+public class GreetingUiApi {
+    private RestTemplate restTemplate;
+    private Greeting fallbackGreeting;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-
-@Service
-@EnableCircuitBreaker
-public class GreetingService {
-    @Autowired
-    private LoadBalancerClient loadBalancer;
-
-    @HystrixCommand(fallbackMethod = "defaultGreeting")
-    public Greeting getGreeting() {
-        String url = loadBalancer.choose("greeting-service").getUri().toString() + "/greeting";
-        return (new RestTemplate()).getForObject(url, Greeting.class);
+    public GreetingUiApi(RestTemplate restTemplate, Greeting fallbackGreeting) {
+        super();
+        this.restTemplate = restTemplate;
+        this.fallbackGreeting = fallbackGreeting;
+    }
+    
+    public Greeting getGreetingFallback() {
+        return fallbackGreeting;
     }
 
-    public Greeting defaultGreeting() {
-        Greeting greeting = new Greeting();
-        greeting.greeting = "Something happened";
+    @GetMapping("/greeting")
+    @HystrixCommand(fallbackMethod = "getGreetingFallback")
+    public Greeting getGreeting() {
+        Greeting greeting = restTemplate.getForObject("http://greeting-service/greeting", Greeting.class);
+        greeting.greeting += "-transformed";
         return greeting;
     }
+
 }
 ----
 
-. Create an @RestController class that will use the GreetingService class `greeting-ui/src/main/java/io/pivotal/GreetingCotroller.java`.
-+
-[source,java]
-----
-package io.pivotal;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-@RestController
-public class GreetingController {
-
-    @Autowired
-    private GreetingService greetingService;
-    
-    @RequestMapping("/greeting")
-    public Greeting greeting() {
-        return greetingService.getGreeting();
-    }
-}
-----
-
-. Update the message-component to call the new local greeting endpoint. You're only changing the url part of the iron-ajax control.  `greeting-ui/src/resources/static/elements/message-display.html`.
-[source, html]
--------------
-    <iron-ajax id="dataService"
-               url="/greeting"
-               on-response="updateData"></iron-ajax>
--------------
-
-. Start the greeting-ui application
-+
-[source,bash]
----------------------------------------------------------------------
-$ mvn clean spring-boot:run
----------------------------------------------------------------------
+. (Re)Start the Greeting UI application
 
 . Hit the web page, click the button, and you should see the service message as normal.
 
-. Kill the greeting-service
+. Kill the Greeting Service
 
 . Click the button again, and you will now see the message as delivered by the fallback method.
+
+. Restart Greeting Service, wait a bit, then try again.  UI should be functioning again!
+
