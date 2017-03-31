@@ -1,0 +1,96 @@
+= Spring Cloud Sleuth and Zipkin
+
+In this lab we will use Sleuth to output service details in a standard format to logs.  Output will be added to the GreetingUI server that can be shown in monitoring.  We will then hook up our services to the Zipkin distributed tracing tool.
+
+== Setup
+
+. The Zipkin server is new, so load it into STS.  If you need, load the starters as well.
++
+[source, bash]
+---------------------------------------------------------------------
+cn-workshop
+├── labs
+│   ├── lab07
+│   │   ├── greeting-service
+│   │   ├── greeting-ui
+cn-workshop
+├── scs-servers
+│   ├── config-server
+│   ├── registry-server
+│   ├── zipkin-server
+---------------------------------------------------------------------
+
+== Add Sleuth and Zipkin to the Services
+
+The same proceedure is done for both Greeting Service and Greeting UI.
+
+. Open pom.xml and add the dependancies
++
+[source,xml]
+.pom.xml
+----
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-zipkin</artifactId>
+		</dependency>
+----
+
+. Open application.yml and add the properties
++
+[source,yaml]
+.application.yml
+----
+spring:
+  sleuth:
+    sampler:
+      percentage: 1.0 #100%
+  zipkin:
+    base-url: ${ZIPKIN_SERVER_URI:http://localhost:9411}
+----
+
+. Start Zipkin Server
+
+. (Re)Start Greeting Service and Greeting UI
+
+You can see that Sleuth is working because of output in the logs that has this element "INFO [greeting-service,,,]"
+
+== Create a Span
+
+For this part of the lab we will add a span to a request to enable Zipkin to display more interesting information about what is happening during a request.
+
+. Open up the Controller and inject a Tracer
++
+[source,java]
+.GreetingUiApi.java
+----
+	private final Tracer tracer;
+
+	public GreetingUiApi(RestTemplate restTemplate, Greeting fallbackGreeting, Tracer tracer) {
+		super();
+		this.restTemplate = restTemplate;
+		this.fallbackGreeting = fallbackGreeting;
+		this.tracer = tracer;
+	}
+----
+
+. Next we wrap our calls to the RestTemplate with information to sent out via Sleuth
+.GreetingUiApi.java
+----
+	@GetMapping("/greeting")
+	@HystrixCommand(fallbackMethod = "getGreetingFallback")
+	public Greeting getGreeting() {
+	    Greeting greeting = null;
+		Span span = null;
+		try {
+			span = tracer.createSpan("callingBackOfficeGreetingService_span");
+			span.logEvent("call_backOfficeGreetingService");
+			greeting = restTemplate.getForObject("http://greeting-service/greeting", Greeting.class);
+			span.logEvent("response_received_backOfficeGreetingService");
+			tracer.addTag("ui","success");
+		}finally {
+			tracer.close(span);
+		}
+		greeting.greeting += "-transformed";
+		return greeting;
+	}
+----

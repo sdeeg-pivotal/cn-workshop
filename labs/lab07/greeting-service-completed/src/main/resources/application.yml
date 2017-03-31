@@ -1,0 +1,17 @@
+app:
+  greeting: hello, world
+management:
+  security:
+    enabled: false
+security:
+  basic:
+    enabled: false
+spring:
+  application:
+    name: greeting-service
+  sleuth:
+    sampler:
+      percentage: 1.0 #100%
+  zipkin:
+    base-url: ${ZIPKIN_SERVER_URI:http://localhost:9411}
+    
