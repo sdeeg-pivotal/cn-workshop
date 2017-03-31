@@ -1,5 +1,7 @@
 = Spring Cloud Config
 
+Setup basic configuration for the service.  Then use config server.
+
 This lab will walk through the process of using a Spring Cloud Config server.  The repository will be located in a repo on github.  If you have git available locally, you can use your own local version.  The first thing we need is an appliation that has a property that we will eventually retrieve remotely.
 
 +
