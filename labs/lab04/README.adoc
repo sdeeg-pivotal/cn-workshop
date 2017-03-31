@@ -16,7 +16,11 @@ cn-workshop:
 │   │   ├── greeting-service
 ---------------------------------------------------------------------
 
-== Load properties from application.yml
+== Using Local Properties
+
+In this part of the lab we'll focus on using properties as defined in the and passed from the environment.
+
+=== Load properties from application.yml
 
 . Add the property app.greeting in _application.yml_
 +
@@ -44,7 +48,7 @@ public class Greeting {
 
 . Run the application and see that it returns the expected value.
 
-== Change behavior with Profiles
+=== Change behavior with Profiles
 
 . Create a new file application-new.yml in the resources directory.  Override the greeting property.
 +
@@ -71,7 +75,7 @@ http://localhost:8080/env
 
 Notice that you can see the properties coming from both the files.
 
-== Set property from the CLI
+=== Set property from the CLI
 
 . Launch the applicaiton by setting the property on the CLI.  No reason to rebuild.
 +
@@ -81,19 +85,22 @@ $ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar --spring.profiles.active=
 
 . See that the propery is now set to the value passed to the app.  Parameters from the environment take precedence over those contained in property files bundled in the app.  This is a good way to set things at run time based on the deployment environment.  You can also use Environment variables.  For our example the env var would be APP_GREETING.
 
-== Set up config-server
+== Using Properties from a Service
+
+In this part of the lab we'll use properties retrieved from a server backended by a git repository.
+
+=== Set up config-server
 
 . Load the config-server project into STS/Eclipse
 +
 [source, bash]
 ---------------------------------------------------------------------
-cn-workshop:
-├── labs
-│   ├── lab04
-│   │   ├── config-server
+cn-workshop
+├── scs-servers
+│   ├── config-server
 ---------------------------------------------------------------------
 
-. Review the following file: `cn-workshop/labs/lab04/config-server/pom.xml` By adding `spring-cloud-config-server` to the classpath, this application is eligible to run as a `config-server`.
+. Review pom.xml. By adding `spring-cloud-config-server` to the classpath, the application has the libraries available so it can run as a Config Server.
 +
 [source, xml]
 ----
@@ -103,7 +110,7 @@ cn-workshop:
 </dependency>
 ----
 
-. Make the application a config server by enabling it with the @EnableConfigServer
+. The application is turned into a Config Server with the @EnableConfigServer
 +
 [source, java]
 .ConfigServerApplication.java
@@ -118,7 +125,7 @@ public class ConfigServerApplication {
 }
 ---------------------------------------------------------------------
 
-. Set the GitHub repository for the `config-server`. This will be the source of the configuration data
+. The Config Server is pointed to a git repository via its properties
 +
 [source, yaml]
 .application.yml
@@ -134,12 +141,13 @@ spring:
 #          uri: ${HOME}/dev/app-config
 ---------------------------------------------------------------------
 
-. Open a terminal window and start the `config-server`, or launch from Boot Dashboard.
+. Open a terminal window and start the `config-server`, or launch from Boot Dashboard.  EG:
++
 ----
 $ mvn clean spring-boot:run
 ----
 
-Your `config-server` will be running locally once you see a *“Started ConfigServerApplication…”* message. You will not be returned to a command prompt and must leave this window open.
+Your Config Server will be running locally once you see a *“Started ConfigServerApplication…”* message.
 
 . Open a browser window and fetch the following url: http://localhost:8888/greeting-service/default
 
@@ -149,9 +157,9 @@ The `config-server` exposes several endpoints to fetch configuration.
 
 In this case, we are manually calling one of those endpoints `/{application}/{profile}[/{label}]` to fetch configuration. We substituted our example client application `hello-world` as the {application} and the default profile as the {profile}. We didn’t specify the label to use so master is assumed. In the returned document, we see the configuration file `hello-world.yml` listed as a `propertySource` with the associated key/value pair. This is just an example, as you move through the lab you will add configuration for `greeting-config` (our client application).
 
-== Set up `greeting-service` to consume the remote config
+=== Configure Greeting Service to consume the remote config
 
-. Add the config client in _pom.xml_.  Since we didn't use the initializer to do this, we'll also need to add the dependancy management for Spring Cloud.
+. Add the config client in _pom.xml_.  Since we didn't use the initializer to do this, we'll also need to add the dependancy management for Spring Cloud Services.  These additions will also allow the app to work with a PCF based Config Service.
 +
 [source, xml]
 ---------------------------------------------------------------------
@@ -192,13 +200,16 @@ In this case, we are manually calling one of those endpoints `/{application}/{pr
   </repositories>
 ---------------------------------------------------------------------
 
-. Add the following properties to greeting-service/src/main/resources/bootstrap.yml
+. Add the following properties
 +
 [source, yaml]
+.application.yml
 ---------------------------------------------------------------------
+#SCS enables Spring Security by default, so we need to turn it off
 security:
   basic:
     enabled: false
+#Set the application's name so the Config Server can identify it
 spring:
   application:
     name: greeting-service
@@ -207,7 +218,7 @@ spring:
 #      uri: ${vcap.services.config-service.credentials.uri:http://localhost:8888}
 ---------------------------------------------------------------------
 
-. Start the `greeting-service` and observe the top of the log output where it show attaching to the config server.
+. Start *greeting-service* and observe the top of the log output where it show attaching to the config server.
 +
 [source,bash]
 ---------------------------------------------------------------------
@@ -216,8 +227,6 @@ spring:
 ---------------------------------------------------------------------
 
 . Test the service by hitting the URL: http://localhost:8080/greeting
-
-. Stop the `greeting-config` application
 
 
 *Congratulations!* You’ve just added application configuration that is controllable and can be centrally managed.
