@@ -1,0 +1,48 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+
+<dom-module id="greeting-display">
+
+  <style>
+  div.bubble {
+    margin: 20px;
+    padding: 20px 20px;
+    border-radius: 20px;
+    background-color: #f1f1f1;
+    width: 15em;
+  }
+  </style>
+  
+  <template>
+    <iron-ajax id="dataService"
+               url="/greeting"
+               on-response="updateData"></iron-ajax>
+    <div class="bubble">
+    <p>Greeting: <span>[[greeting]]</span></p>
+    <p>
+      <center><paper-button on-click="getData" raised>Get The Greeting</paper-button></center>
+    </p>
+    </div>
+  </template>
+
+  <script>
+    Polymer({
+      is: "message-display",
+
+      properties: {
+    	greeting: {
+          value: "argle flargle"
+        }
+      },
+      getData: function() {
+    	  this.$.dataService.generateRequest();
+      },
+      updateData: function(theResponse) {
+    	  console.log(JSON.stringify(theResponse.detail.response));
+    	  this.greeting = theResponse.detail.response.greeting;
+      }
+    });
+  </script>
+
+</dom-module>
