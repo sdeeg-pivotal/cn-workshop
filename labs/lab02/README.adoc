@@ -3,20 +3,20 @@
 == Set up the Actuator
 
 Spring Boot includes a number of additional features to help you monitor and manage your application when it’s pushed to production. These features are added by adding _spring-boot-starter-actuator_ to the classpath.  The completed exercise from lab01 has been copied to lab02, and we'll start with it.
-+
-Load the project into STS/Eclipse
-+
+
+. If you don't have the project from lab01 already available, load the project into STS/Eclipse
 [source,bash]
 ---------------------------------------------------------------------
 cn-workshop:
 ├── labs
 │   ├── lab02
-│       └── hello-spring-boot-actuator
+│       └── greeting-service
 ---------------------------------------------------------------------
 
-. Add the Spring Boot Actuator dependency the following file: /hello-spring-boot-actuator/pom.xml
+. Add the Spring Boot Actuator dependency in pom.xml
 +
 [source, xml]
+.pom.xml
 ---------------------------------------------------------------------
 <dependency>
 	<groupId>org.springframework.boot</groupId>
@@ -24,11 +24,29 @@ cn-workshop:
 </dependency>
 ---------------------------------------------------------------------
 
-. Run the updated _hello-spring-boot-actuator_ application:
-+
-$ mvn clean spring-boot:run
+== Open permissions to access management endpoints
 
-. Notice the ne endpoints that are now active in the app
+By default the Actuator endpoints are not accessible.  We'll set a property to turn this off, but first we need to rename the existing property file.
+
+. Rename greeting-service/src/main/resources/application.properties to application.yml
+
+. Add the following property
+
+----
+management:
+  security:
+    enabled: false
+----
+
+== Launch and look at the end points
+
+. Run the application
++
+----
+$ mvn clean spring-boot:run
+----
+
+. Notice the new endpoints that are now active in the app
 
 +
 Try out the following endpoints. The output is omitted here because it can be quite large:
@@ -61,58 +79,13 @@ http://localhost:8080/trace
 +
 Displays trace information (by default the last few HTTP requests).
 
-. Stop the hello-spring-boot-actuator application with CTRL-C.
+. Stop the application with CTRL-C.
 
-== Include Version Control Info
-
-Spring Boot provides an endpoint (http://localhost:8080/info) that allows the exposure of arbitrary metadata. By default, it is empty.
-
-One thing that _actuator_ does well is expose information about the specific build and version control coordinates for a given deployment.
-
-. Edit the following file: *cn-workshop/labs/lab02/hello-spring-boot-actuator/pom.xml*. Add the _git-commit-id-plugin_ to your Maven build. You must edit the file. The _git-commit-id-plugin_ adds Git branch and commit coordinates to the */info* endpoint:
-+
-[source, xml]
----------------------------------------------------------------------
-<plugin>
-	<groupId>pl.project13.maven</groupId>
-	<artifactId>git-commit-id-plugin</artifactId>
-	<configuration>
-			<dotGitDirectory>../../.git</dotGitDirectory>
-	</configuration>
-</plugin>
----------------------------------------------------------------------
-+
-*NOTE* The path *../../.git* refers to the .git directory at the root of the lab materials repo.
-
-. Run the _hello-spring-boot-actuator_ application:
-+
-$ mvn clean spring-boot:run
-
-. Browse to http://localhost:8080/info. Git commit information is now included
-+
-[source,json]
----------------------------------------------------------------------
-{
- "git":{
-    "branch": "master",
-    "commit": {
-      "id": "123456",
-      "time": "2016-03-03T12:05:10-0500"
-    }
-  }
-}
----------------------------------------------------------------------
-
-. Stop the _hello-spring-boot-actuator_ application
-+
-*What Just Happened?*
-+
-By including the _git-commit-id-plugin_, details about git commit information will be included in the */info* endpoint. Git information is captured in a _git.properties_ file that is generated with the build. Review the following file: */hello-spring-boot-actuator/target/classes/git.properties*
 
 == Include Build Info
 
-. Add the following properties to hello-spring-boot-actuator/src/main/resources/application.yml. You must edit the file.
-+
+. Add the following properties to application.yml
+
 [source, yaml]
 ---------------------------------------------------------------------
 info: # add this section
@@ -127,12 +100,12 @@ These will add the project’s Maven coordinates to the /info endpoint. The Spri
 +
 *NOTE:* if STS reports a problem with the application.yml due to @ character the problem can safely be ignored.
 
-. Build and run the hello-spring-boot-actuator application:
+. Build and run the application:
 +
 [source,bash]
 ---------------------------------------------------------------------
 $ mvn clean package
-$ java -jar target/hello-spring-boot-actuator-0.0.1-SNAPSHOT.jar
+$ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar
 ---------------------------------------------------------------------
 
 . Browse to http://localhost:8080/info. Build information is now included. 
@@ -145,18 +118,11 @@ $ java -jar target/hello-spring-boot-actuator-0.0.1-SNAPSHOT.jar
     "name": "hello-spring-boot-actuator",
     "description": "Hello Spring Boot",
     "version": "0.0.0-SNAPSHOT"
- },
- "git":{
-    "branch": "master",
-    "commit": {
-      "id": "123456",
-      "time": "2016-03-03T12:05:10-0500"
-    }
-  }
+ }
 }
 ---------------------------------------------------------------------
 
-. Stop the hello-spring-boot-actuator application.
+. Stop the application.
 +
 *What Just Happened?*
 +
@@ -168,60 +134,27 @@ Read more about exposing data in the /info endpoint link:http://docs.spring.io/s
 
 Spring Boot provides an endpoint http://localhost:8080/health that exposes various health indicators that describe the health of the given application.
 
-Normally, when Spring Security is not enabled, the /health endpoint will only expose an UP or DOWN value. 
+Normally the /health endpoint will only expose simple information value. 
 
-[source,json]
----------------------------------------------------------------------
-{
-  "status": "UP"
-}
----------------------------------------------------------------------
-
-. To simplify working with the endpoint for this lab, we will turn off its sensitivity. Add the following to /hello-spring-boot-actuator/src/main/resources/application.yml:
-+
-[source, yaml]
----------------------------------------------------------------------
-info:
-  build:
-    artifact: @project.artifactId@
-    name: @project.name@
-    description: @project.description@
-    version: @project.version@
-
-endpoints: # add this section
-  health:
-    sensitive: false
----------------------------------------------------------------------
-
-. Build and run the hello-spring-boot-actuator application:
-+
-[source,bash]
----------------------------------------------------------------------
-$ mvn clean package
-$ java -jar target/hello-spring-boot-actuator-0.0.1-SNAPSHOT.jar
----------------------------------------------------------------------
-
-. Browse to http://localhost:8080/health. Out of the box is a _DiskSpaceHealthIndicator_ that monitors health in terms of available disk space. Would your Ops team like to know if the app is close to running out of disk space? DiskSpaceHealthIndicator can be customized via _DiskSpaceHealthIndicatorProperties_. For instance, setting a different threshold for when to report the status as DOWN.
-+
 [source,json]
 ---------------------------------------------------------------------
 {
   "status": "UP",
   "diskSpace": {
-      "status": "UP",
-      "free": 42345678945,
-      "threshold": 12345678
+    "status": "UP",
+    "total": 38195646464,
+    "free": 15599710208,
+    "threshold": 10485760
   }
 }
 ---------------------------------------------------------------------
 
-. Stop the hello-spring-boot-actuator application.
-
-. Create the class _io.pivotal.hello.FlappingHealthIndicator_ (/hello-spring-boot-actuator/src/main/java/io/pivotal/hello/FlappingHealthIndicator.java) and into it paste the following code:
+. Create the class _FlappingHealthIndicator_:
 +
 [source,java]
+.FlappingHealthIndicator.java
 ---------------------------------------------------------------------
-package io.pivotal;
+package io.pivotal.health;
 
 import java.util.Random;
 
@@ -248,12 +181,12 @@ public class FlappingHealthIndicator implements HealthIndicator {
 +
 This demo health indicator will randomize the health check.
 
-. Build and run the _hello-spring-boot-actuator_ application: 
+. Build and run the application: 
 +
 [source,bash]
 ---------------------------------------------------------------------
 $ mvn clean package
-$ java -jar target/hello-spring-boot-actuator-0.0.1-SNAPSHOT.jar
+$ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar
 ---------------------------------------------------------------------
 
 . Browse to http://localhost:8080/health and verify that the output is similar to the following (and changes randomly!). 
@@ -288,39 +221,43 @@ Spring Boot provides an endpoint http://localhost:8080/metrics that exposes seve
 "mem.free": 239376,
 "processors": 8,
 "instance.uptime": 59563,
-"uptime": 69462,
-"systemload.average": 1.5703125,
-"heap.committed": 341504,
-"heap.init": 262144,
-"heap.used": 102127,
-"heap": 3728384,
-"nonheap.committed": 79696,
-"nonheap.init": 2496,
-"nonheap.used": 77326,
-"nonheap": 0,
-"threads.peak": 14,
-"threads.daemon": 11,
-"threads.totalStarted": 17,
-"threads": 13,
-"classes": 9825,
-"classes.loaded": 9825,
-"classes.unloaded": 0,
-"gc.ps_scavenge.count": 9,
-"gc.ps_scavenge.time": 80,
-"gc.ps_marksweep.count": 2,
-"gc.ps_marksweep.time": 157,
-"httpsessions.max": -1,
-"httpsessions.active": 0,
-"gauge.response.metrics": 75,
-"gauge.response.star-star.favicon.ico": 9,
-"counter.status.200.star-star.favicon.ico": 1,
-"counter.status.200.metrics": 1
+...
 }
 ---------------------------------------------------------------------
 
-. Stop the hello-spring-boot-actuator application.
+. Add a Simple Metric incrementor in our RestController
 
-== Deploy _hello-spring-boot-actuator_ to Pivotal Cloud Foundry
+[source,java]
+.GreetingServiceController.java
+----
+package io.pivotal.api;
+
+import org.springframework.boot.actuate.metrics.CounterService;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import io.pivotal.dom.Greeting;
+
+@RestController
+public class GreetingServiceController {
+  private Greeting greeting;
+  private final CounterService counterService;
+  
+  public GreetingServiceController(Greeting greeting, CounterService counterService) {
+    super();
+    this.greeting = greeting;
+    this.counterService = counterService;
+  }
+
+  @GetMapping("/greeting")
+  public Greeting greeting() {
+    counterService.increment("greeting.service.invoked");
+      return greeting;
+  }
+}
+----
+
+== Deploy to Pivotal Cloud Foundry
 . Build the application
 +
 [source,bash]
@@ -328,22 +265,9 @@ Spring Boot provides an endpoint http://localhost:8080/metrics that exposes seve
 $ mvn clean package
 ---------------------------------------------------------------------
 
-. Modify the application manifest in the root folder /hello-spring-boot-actuator
-+
-[source, bash]
----------------------------------------------------------------------
----
-applications:
-- name: hello-spring-boot-actuator-YOUR-INITIALS
-  memory: 512M
-  instances: 1
-  path: ./target/hello-spring-boot-actuator-0.0.1-SNAPSHOT.jar
-  buildpack: java_buildpack
----------------------------------------------------------------------
-
 . Push application into Cloud Foundry
 +
-$ cf push -f manifest.yml
+$ cf push
 
 . Find the URL created for your app in the health status report. Browse to your app.
 
