@@ -3,7 +3,6 @@
 == Create a Spring Boot Project
 
 . If you haven't already, download this git repo and unpack it someplace convenient.
-
 +
 Lab01 starter project is located here:
 +
@@ -91,8 +90,7 @@ public class GreetingServiceController {
   }
 ---------------------------------------------------------------------
 
-+
-Completed:
+.Completed:
 +
 [source,java]
 .GreetingServiceController.java
@@ -124,7 +122,10 @@ public class GreetingServiceController {
 
 . In a terminal, change working directory to *cn-workshop/labs/lab01/hello-spring-boot*
 +
+[source,bash]
+---------------------------------------------------------------------
 $ cd <cn-workshop>/labs/lab01/greeting-service
+---------------------------------------------------------------------
 
 . Run the application
 +
