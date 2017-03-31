@@ -1,0 +1,271 @@
+= Enhancing Boot Application with Metrics
+
+== Set up the Actuator
+
+Spring Boot includes a number of additional features to help you monitor and manage your application when it’s pushed to production. These features are added by adding _spring-boot-starter-actuator_ to the classpath.  The completed exercise from lab01 has been copied to lab02, and we'll start with it.
++
+. If you don't have the project from lab01 already available, load the project into STS/Eclipse
++
+[source,bash]
+---------------------------------------------------------------------
+cn-workshop:
+├── labs
+│   ├── lab02
+│       └── greeting-service
+---------------------------------------------------------------------
+
+. Add the Spring Boot Actuator dependency the following file: /hello-spring-boot-actuator/pom.xml
++
+[source, xml]
+---------------------------------------------------------------------
+<dependency>
+	<groupId>org.springframework.boot</groupId>
+	<artifactId>spring-boot-starter-actuator</artifactId>
+</dependency>
+---------------------------------------------------------------------
+
+== Open permissions to access management endpoints
+
+By default the Actuator endpoints are not accessible.  We'll set a property to turn this off, but first we need to rename the existing property file.
+
+. Rename greeting-service/src/main/resources/application.properties to application.yml
+
+. Add the following property
+
+---
+management:
+  security:
+    enabled: false
+---
+
+== Launch and look at the end points
+
+. Run the application
++
+---
+$ mvn clean spring-boot:run
+---
+
+. Notice the ne endpoints that are now active in the app
+
++
+Try out the following endpoints. The output is omitted here because it can be quite large:
++
+http://localhost:8080/beans
++
+Dumps all of the beans in the Spring context.
++
+http://localhost:8080/autoconfig
++
+Dumps all of the auto-configuration performed as part of application bootstrapping.
++
+http://localhost:8080/configprops
++
+Displays a collated list of all @ConfigurationProperties.
++
+http://localhost:8080/env
++
+Dumps the application’s shell environment as well as all Java system properties.
++
+http://localhost:8080/mappings
++
+Dumps all URI request mappings and the controller methods to which they are mapped.
++
+http://localhost:8080/dump
++
+Performs a thread dump.
++
+http://localhost:8080/trace
++
+Displays trace information (by default the last few HTTP requests).
+
+. Stop the application with CTRL-C.
+
+
+== Include Build Info
+
+. Add the following properties to hello-spring-boot-actuator/src/main/resources/application.yml. You must edit the file.
++
+[source, yaml]
+---------------------------------------------------------------------
+info: # add this section
+  build:
+    artifact: @project.artifactId@
+    name: @project.name@
+    description: @project.description@
+    version: @project.version@
+---------------------------------------------------------------------
++
+These will add the project’s Maven coordinates to the /info endpoint. The Spring Boot Maven plugin will cause them to automatically be replaced in the assembled JAR.
++
+*NOTE:* if STS reports a problem with the application.yml due to @ character the problem can safely be ignored.
+
+. Build and run the application:
++
+[source,bash]
+---------------------------------------------------------------------
+$ mvn clean package
+$ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar
+---------------------------------------------------------------------
+
+. Browse to http://localhost:8080/info. Build information is now included. 
++
+[source,json]
+---------------------------------------------------------------------
+{
+"build": {
+    "artifact": "hello-spring-boot-actuator",
+    "name": "hello-spring-boot-actuator",
+    "description": "Hello Spring Boot",
+    "version": "0.0.0-SNAPSHOT"
+ }
+}
+---------------------------------------------------------------------
+
+. Stop the application.
++
+*What Just Happened?*
++
+We have mapped Maven properties from the pom.xml into the /info endpoint.
++
+Read more about exposing data in the /info endpoint link:http://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#production-ready[here]
+
+== Health Indicators
+
+Spring Boot provides an endpoint http://localhost:8080/health that exposes various health indicators that describe the health of the given application.
+
+Normally the /health endpoint will only expose simple information value. 
+
+[source,json]
+---------------------------------------------------------------------
+{
+  "status": "UP",
+  "diskSpace": {
+    "status": "UP",
+    "total": 38195646464,
+    "free": 15599710208,
+    "threshold": 10485760
+  }
+}
+---------------------------------------------------------------------
+
+. Create the class _FlappingHealthIndicator_:
++
+[source,java]
+.FlappingHealthIndicator.java
+---------------------------------------------------------------------
+package io.pivotal.health;
+
+import java.util.Random;
+
+import org.springframework.boot.actuate.health.Health;
+import org.springframework.boot.actuate.health.HealthIndicator;
+import org.springframework.stereotype.Component;
+
+@Component
+public class FlappingHealthIndicator implements HealthIndicator {
+
+    private Random random = new Random(System.currentTimeMillis());
+
+    @Override
+    public Health health() {
+        int result = random.nextInt(100);
+        if (result < 50) {
+            return Health.down().withDetail("flapper", "failure").withDetail("random", result).build();
+        } else {
+            return Health.up().withDetail("flapper", "ok").withDetail("random", result).build();
+        }
+    }
+
+}
+---------------------------------------------------------------------
++
+This demo health indicator will randomize the health check.
+
+. Build and run the application: 
++
+[source,bash]
+---------------------------------------------------------------------
+$ mvn clean package
+$ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar
+---------------------------------------------------------------------
+
+. Browse to http://localhost:8080/health and verify that the output is similar to the following (and changes randomly!). 
++
+[source,json]
+---------------------------------------------------------------------
+{
+  "status": "UP",
+  "flapping": {
+      "status": "UP",
+      "flapper": "ok",
+      "random": 42
+  },
+  "diskSpace": {
+      "status": "UP",
+      "free": 42345678945,
+      "threshold": 12345678
+  }
+}
+---------------------------------------------------------------------
+
+== Metrics
+
+Spring Boot provides an endpoint http://localhost:8080/metrics that exposes several automatically collected metrics for your application. It also allows for the creation of custom metrics.
+
+. Browse to http://localhost:8080/metrics. Review the metrics exposed. 
++
+[source,json]
+---------------------------------------------------------------------
+{
+"mem": 418830,
+"mem.free": 239376,
+"processors": 8,
+"instance.uptime": 59563,
+"uptime": 69462,
+"systemload.average": 1.5703125,
+"heap.committed": 341504,
+"heap.init": 262144,
+"heap.used": 102127,
+"heap": 3728384,
+"nonheap.committed": 79696,
+"nonheap.init": 2496,
+"nonheap.used": 77326,
+"nonheap": 0,
+"threads.peak": 14,
+"threads.daemon": 11,
+"threads.totalStarted": 17,
+"threads": 13,
+"classes": 9825,
+"classes.loaded": 9825,
+"classes.unloaded": 0,
+"gc.ps_scavenge.count": 9,
+"gc.ps_scavenge.time": 80,
+"gc.ps_marksweep.count": 2,
+"gc.ps_marksweep.time": 157,
+"httpsessions.max": -1,
+"httpsessions.active": 0,
+"gauge.response.metrics": 75,
+"gauge.response.star-star.favicon.ico": 9,
+"counter.status.200.star-star.favicon.ico": 1,
+"counter.status.200.metrics": 1
+}
+---------------------------------------------------------------------
+
+. Stop the application.
+
+== Deploy to Pivotal Cloud Foundry
+. Build the application
++
+[source,bash]
+---------------------------------------------------------------------
+$ mvn clean package
+---------------------------------------------------------------------
+
+. Push application into Cloud Foundry
++
+$ cf push -f manifest.yml
+
+. Find the URL created for your app in the health status report. Browse to your app.
+
+*Congratulations!* You’ve just learned how to add health and metrics to any Spring Boot application.
