@@ -4,10 +4,10 @@ This lab will walk through the process of configuring a Spring app using properi
 
 == Setup
 
-You can continue on with the greeting-service from lab02 or load the starter.  The starter has removed the info/health/metrics.
+You can continue on with the greeting-service from lab02 or load the starter in lab04.  The starter has removed the info/health/metrics.
 
 Load the greeting-service project into STS/Eclipse
-+
+
 [source, bash]
 ---------------------------------------------------------------------
 cn-workshop:
@@ -20,7 +20,7 @@ cn-workshop:
 
 . Add the property app.greeting in _application.yml_
 +
-[yaml]
+[source,yaml]
 .application.yml
 ---------------------------------------------------------------------
 app:
@@ -47,7 +47,8 @@ public class Greeting {
 == Change behavior with Profiles
 
 . Create a new file application-new.yml in the resources directory.  Override the greeting property.
-[yaml]
++
+[source,yaml]
 .application-new.yml
 ---------------------------------------------------------------------
 app:
@@ -56,7 +57,7 @@ app:
 
 . Rebuild the application so it has the new property file.  Run the application setting the Spring Profile to "new"
 +
-[soruce,bash]
+[source,bash]
 ----
 $ mvn clean package
 $ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar --spring.profiles.active=new
@@ -82,7 +83,7 @@ $ java -jar target/greeting-service-0.0.1-SNAPSHOT.jar --spring.profiles.active=
 
 == Set up config-server
 
-Load the config-service project into STS/Eclipse if you like
+. Load the config-server project into STS/Eclipse
 +
 [source, bash]
 ---------------------------------------------------------------------
@@ -102,10 +103,10 @@ cn-workshop:
 </dependency>
 ----
 
-. Make the application a config server by enabling it with the @EnableConfigServer:
-`cn-workshop/labs/lab04/config-server/src/main/java/io/pivotal/ConfigServerApplication.java`
+. Make the application a config server by enabling it with the @EnableConfigServer
 +
 [source, java]
+.ConfigServerApplication.java
 ---------------------------------------------------------------------
 @SpringBootApplication
 @EnableConfigServer
@@ -117,9 +118,10 @@ public class ConfigServerApplication {
 }
 ---------------------------------------------------------------------
 
-. Set the GitHub repository for the `config-server`. This will be the source of the configuration data. Edit the `cn-workshop/labs/lab04/config-server/src/main/resources/application.yml` file
+. Set the GitHub repository for the `config-server`. This will be the source of the configuration data
 +
 [source, yaml]
+.application.yml
 ---------------------------------------------------------------------
 server:
   port: 8888
@@ -133,22 +135,21 @@ spring:
 ---------------------------------------------------------------------
 
 . Open a terminal window and start the `config-server`, or launch from Boot Dashboard.
-```bash
+----
 $ mvn clean spring-boot:run
-```
+----
+
 Your `config-server` will be running locally once you see a *“Started ConfigServerApplication…”* message. You will not be returned to a command prompt and must leave this window open.
 
 . Open a browser window and fetch the following url: http://localhost:8888/greeting-service/default
 
-Config Server - API
-
-TIP: What Just Happened?
+*What Just Happened*
 
 The `config-server` exposes several endpoints to fetch configuration.
 
 In this case, we are manually calling one of those endpoints `/{application}/{profile}[/{label}]` to fetch configuration. We substituted our example client application `hello-world` as the {application} and the default profile as the {profile}. We didn’t specify the label to use so master is assumed. In the returned document, we see the configuration file `hello-world.yml` listed as a `propertySource` with the associated key/value pair. This is just an example, as you move through the lab you will add configuration for `greeting-config` (our client application).
 
-=== Set up `greeting-service` to consume the remote config
+== Set up `greeting-service` to consume the remote config
 
 . Add the config client in _pom.xml_.  Since we didn't use the initializer to do this, we'll also need to add the dependancy management for Spring Cloud.
 +
