@@ -1,4 +1,28 @@
-= Spring Cloud Netflix: Load Balancing and Circuit Breaker
+= Spring Cloud Netflix: Circuit Breaker
+
+
+== Add a JavaScript front end
+
+We will use a modern JavaScript library called Polymer from Google.  The focus of the lab is not on JavaScript UI libraries, so a starter for the project with some frontend code already exists.  It uses the Google Polymer library, but any frontend technology that does AJAX is suitable.
+
+. In a Spring Boot application web resources are server up from the resources/static directory.  Create an index.html file in the resouces/static directory
++
+[source,html]
+.index.html
+----------
+<html>
+  <head>
+    <script src="bower_components/webcomponentsjs/webcomponents-lite.min.js"></script>
+    <link rel="import" href="elements/greeting-display.html">
+  </head>
+  <body>
+    <greeting-display></greeting-display>
+  </body>
+</html>
+----------
+
+This top level interface uses a Web Component loaded from the file greeting-display.html.
+
 
 === Start the `service-registry`, and `greeting-service`
 
