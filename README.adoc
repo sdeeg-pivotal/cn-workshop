@@ -35,12 +35,9 @@ version of the general agenda found link:proposed-agenda.adoc[_HERE_].
   * Session 6: Fault Tolerance with Circuit Breakers
   * Lab 6: link:labs/lab06[_Adding Circuit Breakers_]
 02:15 PM - 02:30 PM:: Break
-02:30 PM - 03:15 PM::
-  * Session 7: Micro-proxy
-  * Lab 7: link:labs/lab07[_Zuul Micro-proxy_]
-03:15 PM - 04:00 PM::
-  * Session 8: Sleuth/Zipkin
-  * Lab 8: link:labs/lab08[_Logging and Tracing_]
-04:00 PM - 04:30 PM::
-  * Session 9: Deploying and Operating on PCF
-04:30 PM - 04:45 PM:: Wrap-Up and Closing
+02:30 PM - 03:00 PM::
+  * Session 7: Sleuth/Zipkin
+  * Lab 7: link:labs/lab07[_Sleuth/Zipkin_]
+03:00 PM - 03:30 PM::
+  * Session 8: Deploying on PCF
+03:30 PM - 04:00 PM:: Wrap-Up and Closing
