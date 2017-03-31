@@ -37,9 +37,9 @@ public class Greeting {
 
 == Configure the App
 
-. Create a GreetingServiceConfiguration class
+. Create a Configuration class to create in instance of Greeting and put it into the context.
 +
-[source, java, numbered]
+[source, java]
 .GreetingServiceConfig.java
 ---------------------------------------------------------------------
 package io.pivotal.config;
@@ -60,15 +60,11 @@ public class GreetingServiceConfig {
 
 == Add an Endpoint
 
-. Create a GreetingServiceController class and add @RestController annotation.  Also add member to store a Greeting object.
+. Create a GreetingServiceController class and make it a @RestController with the annotation.  Also add member to store a Greeting object that we'll use as a response.
 +
-[source, java, numbered]
+[source, java]
 .GreetingServiceController.java
 ---------------------------------------------------------------------
-package io.pivotal.api;
-
-import org.springframework.web.bind.annotation.RestController;
-
 @RestController
 public class GreetingServiceController {
     private Greeting greeting;
