@@ -1,0 +1,23 @@
+{
+  "name": "cna-ui",
+  "authors": [
+    "Scott  Deeg <sdeeg@pivotal.io>"
+  ],
+  "description": "",
+  "main": "",
+  "moduleType": [],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#^1.7.0",
+    "iron-ajax": "PolymerElements/iron-ajax#^1.4.3",
+    "paper-button": "PolymerElements/paper-button#^1.0.14"
+  }
+}
