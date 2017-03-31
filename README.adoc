@@ -20,12 +20,12 @@ version of the general agenda found link:proposed-agenda.adoc[_HERE_].
  * Overview: Cloud Native Design, Domain Driven Design, & Microservices
 10:00 AM - 10:45 AM::
  * Session 1: Introducing Spring and Spring Boot
- * Lab 1: link:labs/lab01/lab01.adoc[Building A Spring Boot Application]
+ * Lab 1: link:labs/lab01[Building A Spring Boot Application]
 10:45 AM - 11:30 AM::
- * Session 2: Advancing Spring Boot with Actuator and Profiles
- * Lab 2: link:labs/lab02/lab02.adoc[_Actuator and Profiles_]
+ * Session 2: Observability with Actuator
+ * Lab 2: link:labs/lab02[_Actuator_]
 11:30 AM - 12:15 AM::
-  * Session 4: Introduction to Spring Cloud
+  * Session 4: Configuration and the Cloud
   * Lab 4: link:labs/lab04/lab04.adoc[_Adding Remote Configuration_]
 12:15 PM - 12:45 PM:: Lunch
 12:45 PM - 01:30 PM::
