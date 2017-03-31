@@ -1,8 +1,10 @@
 = Enhancing Boot Application with Metrics
 
+Spring Boot includes a number of additional features to help you monitor and manage your application when it’s pushed to production. These features are added by adding _spring-boot-starter-actuator_ to the classpath.
+
 == Set up the Actuator
 
-Spring Boot includes a number of additional features to help you monitor and manage your application when it’s pushed to production. These features are added by adding _spring-boot-starter-actuator_ to the classpath.  The completed exercise from lab01 has been copied to lab02, and we'll start with it.
+The completed exercise from lab01 has been copied to lab02, and we'll start with it.
 
 . If you don't have the project from lab01 already available, load the project into STS/Eclipse
 +
