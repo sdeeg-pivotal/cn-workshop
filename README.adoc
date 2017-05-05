@@ -11,33 +11,28 @@ version of the general agenda found link:proposed-agenda.adoc[_HERE_].
 * Clone this repo somewhere convenient
 * Install link:https://spring.io/tools[STS] (or other IDE of your choice)
 * Java 8
+* Maven
 * Cloud Foundry CLI tool: link:https://docs.pivotal.io/pivotalcf/1-10/cf-cli/install-go-cli.html[Instructions]
 
 == Schedule
 
-09:30 AM - 10:00 AM::
+10:15 AM - 11:00 AM::
  * Welcome and Agenda
- * Overview: Cloud Native Design, Domain Driven Design, & Microservices
-10:00 AM - 10:45 AM::
- * Session 1: Introducing Spring and Spring Boot
- * Lab 1: link:labs/lab01[Building A Spring Boot Application]
-10:45 AM - 11:30 AM::
- * Session 2: Observability with Actuator
- * Lab 2: link:labs/lab02[_Actuator_]
-11:30 AM - 12:15 AM::
-  * Session 4: Application Configuration and the Cloud
-  * Lab 4: link:labs/lab04[_Configuration_]
-12:15 PM - 12:45 PM:: Lunch
-12:45 PM - 01:30 PM::
-  * Session 5: Service Discovery & Load Balancing
-  * Lab 5: link:labs/lab05[_Service Discovery and Load Balancing_]
-01:30 PM - 02:15 PM::
-  * Session 6: Fault Tolerance with Circuit Breakers
-  * Lab 6: link:labs/lab06[_Adding Circuit Breakers_]
-02:15 PM - 02:30 PM:: Break
-02:30 PM - 03:00 PM::
-  * Session 7: Sleuth/Zipkin
-  * Lab 7: link:labs/lab07[_Sleuth/Zipkin_]
-03:00 PM - 03:30 PM::
-  * Session 8: Deploying on PCF
-03:30 PM - 04:00 PM:: Wrap-Up and Closing
+ * Overview: Cloud Native Design, Pivotal Cloud Foundry
+11:00 AM - 12:00 AM::
+ * Session 1: Using Pivotal Cloud Foundry
+ * Lab 1: link:labs/lab08[PCF Exercises]
+12:00 PM - 12:45PM::
+ * Lunch
+12:45 AM - 13:45 AM::
+ * Session 2: Intro to Spring Ecosystem
+ * Lab 2: link:labs/lab02[_Build a Boot app_]
+13:45 AM - 14:45 AM::
+  * Session 3: More Spring
+  * Lab 3: link:labs/lab04[_Configuration_]
+14:45 PM - 15:00 PM:: Break
+15:00 PM - 16:00 PM::
+  * Session 4: Observability, Discovery, Fault Tolerance, Consistancy
+16:00 PM - 16:30 PM::
+  * Session 6: Concourse
+16:30 PM - 17:00 PM:: Wrap-up
