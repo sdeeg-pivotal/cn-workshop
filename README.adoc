@@ -29,6 +29,7 @@ version of the general agenda found link:proposed-agenda.adoc[_HERE_].
  * Lab: link:labs/lab01[_Build a Boot app_]
 13:45 AM - 14:45 AM::
   * Session 3: More Spring
+  * Lab: link:labs/lab02[_Actuator_]
   * Lab: link:labs/lab04[_Configuration_]
 14:45 PM - 15:00 PM:: Break
 15:00 PM - 16:00 PM::
