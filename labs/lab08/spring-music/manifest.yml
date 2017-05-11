@@ -1,0 +1,7 @@
+---
+applications:
+- name: spring-music
+  memory: 2G
+  random-route: true
+  path: spring-music-blue.jar
+  buildpack: https://github.com/cloudfoundry/java-buildpack.git

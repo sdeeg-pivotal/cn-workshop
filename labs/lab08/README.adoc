@@ -1,2 +1,231 @@
 = Lab 8: Deploying to PCF
 
+. If you haven't already, download this git repo and unpack it someplace convenient.
++
+Lab08 starter project is located here:
++
+[source, bash]
+---------------------------------------------------------------------
+cn-workshop:
+├── labs
+│   ├── lab08
+│   │   ├── spring-music
+---------------------------------------------------------------------
+
++
+This directory contains two prebuilt versions of the spring-music app from
+https://github.com/cloudfoundry-samples/spring-music
+
+== Push the App
+
+. In a terminal, change working directory to *cn-workshop/labs/lab08/spring-music*
++
+[source,bash]
+---------------------------------------------------------------------
+$ cd <cn-workshop>/labs/lab08/spring-music
+---------------------------------------------------------------------
+
+. Take a look at the manifest to see how PCF will deploy the app
++
+[source, xml]
+.manifest.yml
+---------------------------------------------------------------------
+---
+applications:
+- name: spring-music
+  memory: 2G
+  random-route: true
+  path: spring-music-blue.jar
+  buildpack: https://github.com/cloudfoundry/java-buildpack.git
+---------------------------------------------------------------------
++
+This manifest will create an application named spring-music with 2GB of available memory
++
+The compiled code in the spring-music-blue.jar located in this directory will be used for the application.
++
+The application will use the java-buildpack from git as the runtime.
+. Push the application to PCF
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf push
+---------------------------------------------------------------------
+This will push the app with a random route which will be displayed in the console output.
++
+[source, bash]
+---------------------------------------------------------------------
+requested state: started
+instances: 1/1
+usage: 2G x 1 instances
+urls: spring-music-unassuageable-pilule.bosh-lite.com
+last uploaded: Tue May 9 15:29:34 UTC 2017
+stack: cflinuxfs2
+buildpack: https://github.com/cloudfoundry/java-buildpack.git
+---------------------------------------------------------------------
+. Verify the application is running by browsing to the url
++
+In this example it is *spring-music-unassuageable-pilule.bosh-lite.com*
++
+The banner at the top should be blue.
++
+NOTE: The route will be used throughout the rest of the demo.
+In this example it is *spring-music-unassuageable-pilule*.
+
+== Scale the App Vertically
+
+. Reduce the available memory for the app to 1GB
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf scale spring-music -m 1G
+---------------------------------------------------------------------
+When prompted to restart the app respond yes
+
+== Scale the App Horizontally
+
+. Increase the number of instances of the app to 2
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf scale spring-music -i 2
+---------------------------------------------------------------------
+When prompted to restart the app respond yes
+. Verify there are two running instances
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf apps
+Getting apps in org yolo / space development as admin...
+OK
+
+name           requested state   instances   memory   disk   urls
+spring-music   started           2/2         1G       1G     spring-music-unassuageable-pilule.bosh-lite.com
+---------------------------------------------------------------------
+. Decrease the number of instances of the app to 1
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf scale spring-music -i 1
+---------------------------------------------------------------------
+
+== Deploy a New Version of the App
+
+. Push the green version of the app
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf push -f manifest-green.yml -n <application-route>-temp
+---------------------------------------------------------------------
++
+The -n specifies the route to use for the new app. Use the route from earlier with -temp appended.
++
+In this example the route is *spring-music-unassuageable-pilule-temp*
++
+The -f specifies the manifest for deployment.
++
+[source, xml]
+.manifest-green.yml
+---------------------------------------------------------------------
+---
+applications:
+- name: spring-music-new
+  memory: 1G
+  path: spring-music-green.jar
+  buildpack: https://github.com/cloudfoundry/java-buildpack.git
+---------------------------------------------------------------------
++
+This manifest will create an application named spring-music-new with 1GB of available memory
++
+The compiled code in the spring-music-green.jar located in this directory will be used for the application.
++
+. Verify the application is running by browsing to the url
++
+In this example it is *spring-music-unassuageable-pilule-temp.bosh-lite.com*
++
+The banner at the top should be green.
+
+== Do a Blue/Green Deployment
+
+. Map the original route to the new app
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf map-route spring-music-new <host> -n <application-route>
+---------------------------------------------------------------------
+In this example the host is *bosh-lite.com* and the application-route is *spring-music-unassuageable-pilule*
++
+The route is now load balancing between the two version of the application
+
+. Verify the route points to both versions of the app
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf apps
+Getting apps in org yolo / space development as admin...
+OK
+
+name               requested state   instances   memory   disk   urls
+spring-music       started           1/1         1G       1G     spring-music-unassuageable-pilule.bosh-lite.com
+spring-music-new   started           1/1         1G       1G     spring-music-unassuageable-pilule.bosh-lite.com, spring-music-unassuageable-pilule-temp.bosh-lite.com
+---------------------------------------------------------------------
++
+Hard refresh the application a few times in a browser and it will change from blue to green
+
+. Unmap the route to the original application
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf unmap-route spring-music <host> -n <application-route>
+---------------------------------------------------------------------
++
+In this example the host is *bosh-lite.com* and the application-route is *spring-music-unassuageable-pilule*
++
+The route is only pointing to the new application now.
+. Verify the route only points to the new version of the application
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf apps
+Getting apps in org yolo / space development as admin...
+OK
+
+name               requested state   instances   memory   disk   urls
+spring-music       started           1/1         1G       1G
+spring-music-new   started           1/1         1G       1G     spring-music-unassuageable-pilule.bosh-lite.com, spring-music-unassuageable-pilule-temp.bosh-lite.com
+---------------------------------------------------------------------
+Refresh the application in a browser and it will only be green now
+
+. Remove the temporary route
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf unmap-route spring-music-new <host> -n <application-route>-temp
+---------------------------------------------------------------------
+
+. Remove the original version of the app
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf delete spring-music
+---------------------------------------------------------------------
+When prompted to restart the app respond yes
+
+. Rename the new version of the app to the original name
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf rename spring-music-new spring-music
+---------------------------------------------------------------------
+
+. Verify the new version of the app is named spring-music
++
+---------------------------------------------------------------------
+$ cf apps
+Getting apps in org yolo / space development as admin...
+OK
+
+name           requested state   instances   memory   disk   urls
+spring-music   started           1/1         1G       1G     spring-music-unassuageable-pilule.bosh-lite.com
+---------------------------------------------------------------------
+
+*Congratulations!* You’ve just scaled an application and completed a blue/green deployment in PCF.
