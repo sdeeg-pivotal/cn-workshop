@@ -228,4 +228,81 @@ name           requested state   instances   memory   disk   urls
 spring-music   started           1/1         1G       1G     spring-music-unassuageable-pilule.bosh-lite.com
 ---------------------------------------------------------------------
 
-*Congratulations!* You’ve just scaled an application and completed a blue/green deployment in PCF.
+== Bind Services to the App
+
+. Look at the List of Available Services
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf marketplace
+---------------------------------------------------------------------
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf marketplace
+Getting services from marketplace in org yolo / space development as admin...
+OK
+
+service                       plans                                                                                description
+3scale                        free_appdirect, basic_appdirect*                                                     API Management Platform
+app-autoscaler                standard                                                                             Scales bound applications in response to load
+blazemeter                    free-tier, basic1kmr*, pro5kmr*                                                      Performance Testing Platform
+cedexisopenmix                opx_global*, openmix-gslb-with-fusion-feeds*                                         Openmix Global Cloud and Data Center Load Balancer
+cedexisradar                  free-community-edition                                                               Free Website and Mobile App Performance Reports
+cleardb                       spark, boost*, amp*, shock*                                                          Highly available MySQL for your Apps.
+cloudamqp                     lemur, tiger*, bunny*, rabbit*, panda*                                               Managed HA RabbitMQ servers in the cloud
+cloudforge                    free, standard*, pro*                                                                Development Tools In The Cloud
+elephantsql                   turtle, panda*, hippo*, elephant*                                                    PostgreSQL as a Service
+---------------------------------------------------------------------
+
+. Look at the List of Service Plans
++
+[source,bash]
+---------------------------------------------------------------------
+cf marketplace -s <servicename>
+---------------------------------------------------------------------
++
+In this example the servicename is *elepantsql*
++
+[source,bash]
+---------------------------------------------------------------------
+cf marketplace -s elephantsql
+Getting service plan information for service elephantsql as admin...
+OK
+
+service plan   description                                            free or paid
+turtle         4 concurrent connections, 20MB Storage                 free
+panda          20 concurrent connections, 2GB Storage                 paid
+hippo          300 concurrent connections, 100 GB Storage             paid
+elephant       300 concurrent connections, 1000 GB Storage, 500Mbps   paid
+---------------------------------------------------------------------
++
+. Create a Service Instance
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf create-service <service> <service-plan> <service-name>
+---------------------------------------------------------------------
++
+In this example the service is *elepantsql* the service-plan is *turtle* and the service-name is *my-db*
+. Bind the Service Instance to the Application
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf bind-service <app-name> <service-name>
+---------------------------------------------------------------------
++
+In this example the app-name is *spring-music* the service-name is *my-db*
++
+. Restage the Application so the new service is detected
++
+[source,bash]
+---------------------------------------------------------------------
+$ cf restage spring-music
+---------------------------------------------------------------------
++
+. Verify the Service has been Added to the App
++
+Browse to the application and click the info icon in the top-right. You should see *my-sql* in the list of services.
++
+*Congratulations!* You’ve just scaled an application and completed a blue/green deployment, and bound service to an application in PCF.
