@@ -33,6 +33,7 @@ version of the general agenda found link:proposed-agenda.adoc[_HERE_].
 14:45 PM - 15:00 PM:: Break
 15:00 PM - 16:00 PM::
   * Session 4: Observability, Discovery, Fault Tolerance, Consistancy
+  * Lab: ??
 16:00 PM - 16:30 PM::
-  * Session 5: Concourse
+  * Session 5: blue/green deploy example in Concourse
 16:30 PM - 17:00 PM:: Wrap-up
