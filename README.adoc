@@ -36,4 +36,5 @@ version of the general agenda found link:proposed-agenda.adoc[_HERE_].
   * Lab: ??
 16:00 PM - 16:30 PM::
   * Session 5: blue/green deploy example in Concourse
+  * link:https://github.com/pivotalservices/concourse-pipeline-samples[Samples]
 16:30 PM - 17:00 PM:: Wrap-up
